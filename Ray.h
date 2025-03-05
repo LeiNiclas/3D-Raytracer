@@ -8,17 +8,17 @@ using Point3 = Vector3;
 class Ray
 {
     private:
-        Point3 origin;
-        Vector3 direction;
+        Point3 orig;
+        Vector3 dir;
     
     public:
-        Ray() {}
-        Ray(const Point3& origin, const Vector3& direction) {}
+        Ray() : orig(Point3()), dir(Vector3()) {}
+        Ray(const Point3& origin, const Vector3& direction) : orig(origin), dir(direction) {}
 
-        const Point3& origin() const { return origin; }
-        const Vector3& direction() const { return direction; }
+        const Point3& origin() const { return orig; }
+        const Vector3& direction() const { return dir; }
 
-        Point3 at(float t) const { return origin + t * direction; }
+        Point3 at(float t) const { return orig + t * dir; }
 };
 
 #endif

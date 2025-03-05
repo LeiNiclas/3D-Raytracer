@@ -41,7 +41,7 @@ class Vector3
 
         Vector3& operator/=(float s)
         {
-            return *this *= 1.0 / s;
+            return *this *= 1.0f / s;
         }
 
         float magnitude() const
@@ -93,7 +93,7 @@ inline Vector3 operator*(const Vector3& v, float s)
 
 inline Vector3 operator/(const Vector3& v, float s)
 {
-    return (1.0 / s) * v; 
+    return (1.0f / s) * v; 
 }
 
 inline float dotP(const Vector3& v1, const Vector3& v2)
