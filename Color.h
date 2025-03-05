@@ -3,8 +3,6 @@
 
 #include "Vector3.h"
 
-#include <iostream>
-
 using Color = Vector3;
 
 void writeColor(std::ostream& out, const Color& pixelColor)

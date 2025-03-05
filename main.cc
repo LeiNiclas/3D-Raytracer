@@ -1,29 +1,18 @@
-#include <iostream>
-#include "Color.h"
-#include "Ray.h"
-#include "Vector3.h"
+#include "Utilities.h"
+#include "Hittable.h"
+#include "HittableList.h"
+#include "Sphere.h"
 
 // After building, execute the output file using
 // build\Debug\outDebug.exe | set-content image.ppm -encoding String
 
-bool hitSphere(const Point3& center, float radius, const Ray& r)
+
+Color calculateRayColor(const Ray& ray, const Hittable& world)
 {
-    Vector3 oc = center - r.origin();
+    HitRecord record;
 
-    float a = dotP(r.direction(), r.direction());
-    float b = -2.0f * dotP(r.direction(), oc);
-    float c = dotP(oc, oc) - radius * radius;
-
-    float discriminant = b * b - 4.0f * a * c;
-
-    return discriminant >= 0.0f;
-}
-
-
-Color calculateRayColor(const Ray& ray)
-{
-    if (hitSphere(Point3(0, 0., -1), 0.5f, ray))
-        return Color(1, 0, 0);
+    if (world.hit(ray, 0, infinity, record))
+        return 0.5 * (record.normal + Color(1, 1, 1));
 
     Vector3 unitRay = normalized(ray.direction());
 
@@ -35,7 +24,7 @@ int main()
 {
     // Image properties
     const float aspectRatio = 16.0f / 9.0f;
-    const int imageWidth = 512;
+    const int imageWidth = 1024;
     const int imageHeight = int(imageWidth / aspectRatio);
 
 
@@ -57,9 +46,13 @@ int main()
                                 Vector3(0, 0, focalLength) -
                                 viewportHeightVector / 2 -
                                 viewportWidthVector / 2;
-    Point3 centerPixelPosition = viewportUpperLeft + 0.5 * (pixelDeltaX + pixelDeltaY);
+    Point3 centerPixelPosition = viewportUpperLeft + 0.5f * (pixelDeltaX + pixelDeltaY);
 
-
+    // World properties
+    HittableList world;
+    world.add(make_shared<Sphere>(Point3(0, 0, -1), 0.5f));
+    world.add(make_shared<Sphere>(Point3(0, -100.5f, -1), 100));
+    world.add(make_shared<Sphere>(Point3(1, 0.25f, -1), 0.05f));
 
 
     // Rendering
@@ -81,12 +74,11 @@ int main()
 
             // Create the ray and calculate the resulting color.
             Ray ray = Ray(cameraCenter, rayDirection);
-            Color rayColor = calculateRayColor(ray);
-            Color pixelColor = rayColor;
+            Color pixelColor = calculateRayColor(ray, world);
 
             writeColor(std::cout, pixelColor);
         }
     }
 
-    std::clog << "\rDone.\n";
+    std::clog << "Done.\n";
 }
