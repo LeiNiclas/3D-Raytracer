@@ -6,9 +6,28 @@
 // After building, execute the output file using
 // build\Debug\outDebug.exe | set-content image.ppm -encoding String
 
+bool hitSphere(const Point3& center, float radius, const Ray& r)
+{
+    Vector3 oc = center - r.origin();
+
+    float a = dotP(r.direction(), r.direction());
+    float b = -2.0f * dotP(r.direction(), oc);
+    float c = dotP(oc, oc) - radius * radius;
+
+    float discriminant = b * b - 4.0f * a * c;
+
+    return discriminant >= 0.0f;
+}
+
+
 Color calculateRayColor(const Ray& ray)
 {
-    float a = 0.5f * (ray.direction().y() + 1.0f);
+    if (hitSphere(Point3(0, 0., -1), 0.5f, ray))
+        return Color(1, 0, 0);
+
+    Vector3 unitRay = normalized(ray.direction());
+
+    float a = 0.5f * (unitRay.y() + 1.0f);
     return (1.0f - a) * Color(1.0f, 1.0f, 1.0f) + a * Color(0.5f, 0.7f, 1.0f);
 }
 
@@ -16,7 +35,7 @@ int main()
 {
     // Image properties
     const float aspectRatio = 16.0f / 9.0f;
-    const int imageWidth = 256;
+    const int imageWidth = 512;
     const int imageHeight = int(imageWidth / aspectRatio);
 
 
@@ -59,7 +78,6 @@ int main()
 
             // Calculate the direction of the outgoing ray from the camera.
             Vector3 rayDirection = pixelCenter - cameraCenter;
-            rayDirection = normalized(rayDirection);
 
             // Create the ray and calculate the resulting color.
             Ray ray = Ray(cameraCenter, rayDirection);
@@ -70,5 +88,5 @@ int main()
         }
     }
 
-    std::clog << "\rDone.              \n";
+    std::clog << "\rDone.\n";
 }
