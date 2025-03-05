@@ -1,7 +1,8 @@
-#include "Utilities.h"
 #include "Hittable.h"
 #include "HittableList.h"
+#include "Interval.h"
 #include "Sphere.h"
+#include "Utilities.h"
 
 // After building, execute the output file using
 // build\Debug\outDebug.exe | set-content image.ppm -encoding String
@@ -11,7 +12,7 @@ Color calculateRayColor(const Ray& ray, const Hittable& world)
 {
     HitRecord record;
 
-    if (world.hit(ray, 0, infinity, record))
+    if (world.hit(ray, Interval(0, infinity), record))
         return 0.5 * (record.normal + Color(1, 1, 1));
 
     Vector3 unitRay = normalized(ray.direction());

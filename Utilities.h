@@ -23,6 +23,7 @@ inline float deg2rad(float deg) { return deg * pi / 180.0f; }
 // Common headers
 
 #include "Color.h"
+#include "Interval.h"
 #include "Ray.h"
 #include "Vector3.h"
 

@@ -13,7 +13,7 @@ class Sphere : public Hittable
     public:
         Sphere(const Point3& center, float radius) : center(center), radius(radius) {}
 
-        bool hit(const Ray& ray, float rayMinT, float rayMaxT, HitRecord& record) const override
+        bool hit(const Ray& ray, Interval rayT, HitRecord& record) const override
         {
             Vector3 oc = center - ray.origin();
 
@@ -31,11 +31,11 @@ class Sphere : public Hittable
             // Calculate the nearest root in accepted range
             float solution = (h - discriminant) / a;
 
-            if (solution <= rayMinT || rayMaxT <= solution)
+            if (solution <= rayT.min || rayT.max <= solution)
             {
                 solution = (h + discriminant);
                 
-                if (solution <= rayMinT || rayMaxT <= solution)
+                if (solution <= rayT.min || rayT.max <= solution)
                     return false;
             }
 
