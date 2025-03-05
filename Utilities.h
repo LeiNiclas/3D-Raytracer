@@ -2,6 +2,7 @@
 #define UTILITIES_H
 
 #include <cmath>
+#include <cstdlib>
 #include <iostream>
 #include <limits>
 #include <memory>
@@ -19,6 +20,10 @@ const float pi = 3.1415926535;
 // Utils
 
 inline float deg2rad(float deg) { return deg * pi / 180.0f; }
+
+inline float randomFloat() { return std::rand() / (RAND_MAX + 1.0f); }
+
+inline float randomFloat(float min, float max) { return min + (max-min) * randomFloat(); }
 
 // Common headers
 

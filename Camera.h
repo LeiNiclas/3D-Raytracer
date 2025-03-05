@@ -8,6 +8,7 @@ class Camera
 {
     private:
         int     imageHeight;
+        float   pixelSampleScale;
         Point3  center;
         Point3  centerPixelPosition;
         Vector3 pixelDeltaX;
@@ -18,6 +19,8 @@ class Camera
         {
             imageHeight = int(imageWidth / aspectRatio);
             center = Point3(0, 0, 0);
+
+            pixelSampleScale = 1.0f / samplesPerPixel;
 
             // Viewport properties
             float focalLength = 1.0f;
@@ -39,6 +42,22 @@ class Camera
         }
 
 
+        Ray getRay(int x, int y) const
+        {
+            Vector3 offset = sampleSquare();
+            Vector3 pixelSample =   centerPixelPosition +
+                                    ((x + offset.x()) * pixelDeltaX) +
+                                    ((y + offset.y()) * pixelDeltaY);
+            
+            Point3 rayOrigin = center;
+            Vector3 rayDirection = pixelSample - rayOrigin;
+
+            return Ray(rayOrigin, rayDirection);
+        }
+
+        Vector3 sampleSquare() const { return Vector3(randomFloat() - 0.5f, randomFloat() - 0.5f, 0); }
+
+
         Color rayColor(const Ray& ray, const Hittable& world) const
         {
             HitRecord record;
@@ -58,6 +77,7 @@ class Camera
     public:
         float   aspectRatio = 1.0f;
         int     imageWidth = 100;
+        int     samplesPerPixel = 10;
 
         void render(const Hittable& world)
         {
@@ -73,17 +93,15 @@ class Camera
             
                 for (int x = 0; x < imageWidth; x++)
                 {
-                    // Calculate the center position of the current pixel.
-                    Point3 pixelCenter = centerPixelPosition + (float(x) * pixelDeltaX) + (float(y) * pixelDeltaY);
-                
-                    // Calculate the direction of the outgoing ray from the camera.
-                    Vector3 rayDirection = pixelCenter - center;
-                
-                    // Create the ray and calculate the resulting color.
-                    Ray ray = Ray(center, rayDirection);
-                    Color pixelColor = rayColor(ray, world);
-                
-                    writeColor(std::cout, pixelColor);
+                    Color pixelColor(0, 0, 0);
+
+                    for (int i = 0; i < samplesPerPixel; i++)
+                    {
+                        Ray ray = getRay(x, y);
+                        pixelColor += rayColor(ray, world);
+                    }
+
+                    writeColor(std::cout, pixelSampleScale * pixelColor);
                 }
             }
         
