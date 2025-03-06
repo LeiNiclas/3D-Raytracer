@@ -8,6 +8,7 @@ class Vector3
         float values[3];
 
         Vector3() : values{0, 0, 0} {}
+        Vector3(float rgb) : values{rgb, rgb, rgb} {}
         Vector3(float x, float y, float z) : values{x, y, z} {}
 
         float x() const { return values[0]; }
@@ -41,6 +42,8 @@ class Vector3
             return *this *= 1.0f / s;
         }
 
+        /// @brief Calculate the length of a vector.
+        /// @return The length of the given vector.
         float magnitude() const
         {
             return std::sqrt
@@ -49,6 +52,22 @@ class Vector3
                 values[1] * values[1] +
                 values[2] * values[2]
             );
+        }
+
+        /// @brief Generate a vector with random components between 0 and 1.
+        /// @return A vector with random components between 0 and 1.
+        static Vector3 randomVector()
+        {
+            return Vector3(randomFloat(), randomFloat(), randomFloat());
+        }
+
+        /// @brief Generate a vector with random components between min and max.
+        /// @param min The minimum value for the vector components.
+        /// @param max The maximum value for the vector components.
+        /// @return A vector with random components.
+        static Vector3 randomVector(float min, float max)
+        {
+            return Vector3(randomFloat(min, max), randomFloat(min, max), randomFloat(min, max));
         }
 };
 
@@ -93,6 +112,8 @@ inline Vector3 operator/(const Vector3& v, float s)
     return (1.0f / s) * v; 
 }
 
+/// @brief Calculate the dot product of two vectors.
+/// @return Dot product of v1 * v2.
 inline float dotP(const Vector3& v1, const Vector3& v2)
 {
     return  v1.values[0] * v2.values[0] +
@@ -100,6 +121,8 @@ inline float dotP(const Vector3& v1, const Vector3& v2)
             v1.values[2] * v2.values[2];
 }
 
+/// @brief Calculate the cross product of two vectors.
+/// @return Cross product of v1 x v2.
 inline Vector3 crossP(const Vector3& v1, const Vector3& v2)
 {
     return Vector3
@@ -110,9 +133,40 @@ inline Vector3 crossP(const Vector3& v1, const Vector3& v2)
     );
 }
 
+/// @brief Calculate the unit vector of vector v.
+/// @param v The vector to normalize.
+/// @return Unit vector of v.
 inline Vector3 normalized(const Vector3& v)
 {
     return v / v.magnitude();
+}
+
+/// @brief Generate a random unit vector.
+/// @return New vector with random direction and magnitude of 1.
+inline Vector3 randomUnitVector()
+{
+    while (true)
+    {
+        Vector3 v = Vector3::randomVector(-1.0f, 1.0f);
+        float vSquared = dotP(v, v);
+        
+        if (1e-38 < vSquared && vSquared <= 1)
+            return v / sqrt(vSquared);
+    }
+}
+
+
+/// @brief Generate a random vector pointing away from a surface.
+/// @param normal The normal of the surface.
+/// @return new vector where its dot product with the normal is < 0. 
+inline Vector3 randomOnHemisphere(const Vector3& normal)
+{
+    Vector3 onSurfaceVector = randomUnitVector();
+
+    if (dotP(onSurfaceVector, normal) > 0.0f)
+        return onSurfaceVector;
+    else
+        return onSurfaceVector;
 }
 
 #endif

@@ -58,14 +58,20 @@ class Camera
         Vector3 sampleSquare() const { return Vector3(randomFloat() - 0.5f, randomFloat() - 0.5f, 0); }
 
 
-        Color rayColor(const Ray& ray, const Hittable& world) const
+        Color rayColor(const Ray& ray, int depth, const Hittable& world) const
         {
+            if (depth <= 0)
+                return Color(0.0f);
+
             HitRecord record;
 
             // Objects of the world
-            if (world.hit(ray, Interval(0, infinity), record))
-                return 0.5f * (record.normal + Color(1, 1, 1));
-            
+            if (world.hit(ray, Interval(0.001, infinity), record))
+            {
+                Vector3 direction = record.normal + randomUnitVector();
+                return 0.8f * rayColor(Ray(record.p, direction), depth-1, world);
+            }
+
             Vector3 unitDirection = normalized(ray.direction());
 
             // Background / skybox
@@ -73,11 +79,13 @@ class Camera
 
             return (1.0f - a) * Color(1.0f, 1.0f, 1.0f) + a * Color(0.5f, 0.7f, 1.0f);
         }
-
+    
+    
     public:
-        float   aspectRatio = 1.0f;
-        int     imageWidth = 100;
+        float   aspectRatio     = 1.0f;
+        int     imageWidth      = 100;
         int     samplesPerPixel = 10;
+        int     maxDepth        = 10;
 
         void render(const Hittable& world)
         {
@@ -98,7 +106,7 @@ class Camera
                     for (int i = 0; i < samplesPerPixel; i++)
                     {
                         Ray ray = getRay(x, y);
-                        pixelColor += rayColor(ray, world);
+                        pixelColor += rayColor(ray, maxDepth, world);
                     }
 
                     writeColor(std::cout, pixelSampleScale * pixelColor);
