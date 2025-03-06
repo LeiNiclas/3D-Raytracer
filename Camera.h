@@ -69,7 +69,7 @@ class Camera
             if (world.hit(ray, Interval(0.001, infinity), record))
             {
                 Vector3 direction = record.normal + randomUnitVector();
-                return 0.8f * rayColor(Ray(record.p, direction), depth-1, world);
+                return 0.6f * rayColor(Ray(record.p, direction), depth-1, world);
             }
 
             Vector3 unitDirection = normalized(ray.direction());
