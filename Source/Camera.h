@@ -66,8 +66,9 @@ class Camera
             
             Point3 rayOrigin = (defocusAngle <= 0) ? center : defocusDiskSample();
             Vector3 rayDirection = pixelSample - rayOrigin;
+            float rayTime = randomFloat();
 
-            return Ray(rayOrigin, rayDirection);
+            return Ray(rayOrigin, rayDirection, rayTime);
         }
 
         Vector3 sampleSquare() const { return Vector3(randomFloat() - 0.5f, randomFloat() - 0.5f, 0); }
@@ -146,7 +147,6 @@ class Camera
         
             std::clog << "\rDone.                           \n";
         }
-
 };
 
 

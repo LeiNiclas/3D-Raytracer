@@ -7,7 +7,7 @@
         "command": "g++",
         "args": [
           "-g",
-          "${workspaceFolder}/main.cc",
+          "${workspaceFolder}/Source/main.cc",
           "-o",
           "${workspaceFolder}/build/Debug/outDebug"
         ],
@@ -23,7 +23,7 @@
         "command": "powershell",
         "args": [
           "-Command",
-          "& { g++ -g ${workspaceFolder}/main.cc -o ${workspaceFolder}/build/Debug/outDebug; ${workspaceFolder}/build/Debug/outDebug.exe | Set-Content image.ppm -Encoding String }"
+          "& { g++ -g ${workspaceFolder}/Source/main.cc -o ${workspaceFolder}/build/Debug/outDebug; ${workspaceFolder}/build/Debug/outDebug.exe | Set-Content image.ppm -Encoding String }"
         ],
         "group": {
           "kind": "build",

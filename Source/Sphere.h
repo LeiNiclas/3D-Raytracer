@@ -7,17 +7,20 @@
 class Sphere : public Hittable
 {
     private:
-        Point3 center;
+        Ray center;
         float radius;
         shared_ptr<Material> mat;
-    
+
     public:
         Sphere(const Point3& center, float radius, shared_ptr<Material> mat)
-        : center(center), radius(radius), mat(mat) {}
+        : center(center, Vector3(0)), radius(radius), mat(mat) {}
+        Sphere(const Point3& startCenter, const Point3& endCenter, float radius, shared_ptr<Material> mat)
+        : center(startCenter, endCenter - startCenter), radius(radius), mat(mat) {}
 
         bool hit(const Ray& ray, Interval rayT, HitRecord& record) const override
         {
-            Vector3 oc = center - ray.origin();
+            Point3 currentCenter = center.at(ray.time());
+            Vector3 oc = currentCenter - ray.origin();
 
             float a = dotP(ray.direction(), ray.direction());
             float h = dotP(ray.direction(), oc);
@@ -43,7 +46,7 @@ class Sphere : public Hittable
 
             record.t = solution;
             record.p = ray.at(record.t);
-            Vector3 outwardNormal = (record.p - center) / radius;
+            Vector3 outwardNormal = (record.p - currentCenter) / radius;
             record.setFaceNormal(ray, outwardNormal);
             record.mat = mat;
 

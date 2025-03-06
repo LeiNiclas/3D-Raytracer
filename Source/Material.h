@@ -38,7 +38,7 @@ class LambertianMaterial : public Material
             if (scatterDirection.nearZero())
                 scatterDirection = record.normal;
 
-            scattered = Ray(record.p, scatterDirection);
+            scattered = Ray(record.p, scatterDirection, ray.time());
             attenuation = albedo;
             return true;
         }
@@ -60,7 +60,7 @@ class MetalMaterial : public Material
             Vector3 reflected = reflect(ray.direction(), record.normal);
             reflected = normalized(reflected) + (fuzz * randomUnitVector());
             
-            scattered = Ray(record.p, reflected);
+            scattered = Ray(record.p, reflected, ray.time());
             attenuation = albedo;
             
             return true;
@@ -104,7 +104,7 @@ class DielectricMaterial : public Material
             else
                 direction = refract(unitDirection, -record.normal, ri);
 
-            scattered = Ray(record.p, direction);
+            scattered = Ray(record.p, direction, ray.time());
 
             return true;
         }
