@@ -14,28 +14,37 @@ class Camera
         Point3  centerPixelPosition;
         Vector3 pixelDeltaX;
         Vector3 pixelDeltaY;
+        Vector3 u;
+        Vector3 v;
+        Vector3 w;
 
 
         void init()
         {
             imageHeight = int(imageWidth / aspectRatio);
-            center = Point3(0, 0, 0);
-
             pixelSampleScale = 1.0f / samplesPerPixel;
+            
+            center = lookfrom;
 
             // Viewport properties
-            float focalLength = 1.0f;
-            float viewportHeight = 2.0f;
+            float focalLength = (lookfrom - lookat).magnitude();
+            float theta = deg2rad(verticalFOV);
+            float h = std::tan(theta / 2.0f);
+            float viewportHeight = 2.0f * h * focalLength;
             float viewportWidth = viewportHeight * (float(imageWidth) / imageHeight);
+            
+            w = normalized(lookfrom - lookat);
+            u = normalized(crossP(vup, w));
+            v = crossP(w, u);
 
-            Vector3 viewportWidthVector = Vector3(viewportWidth, 0, 0);
-            Vector3 viewportHeightVector = Vector3(0, -viewportHeight, 0);
+            Vector3 viewportWidthVector = viewportWidth * u;
+            Vector3 viewportHeightVector = viewportHeight * -v;
 
             pixelDeltaX = viewportWidthVector / imageWidth;
             pixelDeltaY = viewportHeightVector / imageHeight;
             
             Vector3 viewportUpperLeft = center -
-                                        Vector3(0, 0, focalLength) -
+                                        (focalLength * w) -
                                         viewportWidthVector / 2.0f -
                                         viewportHeightVector / 2.0f;
             
@@ -83,15 +92,19 @@ class Camera
             // Background / skybox
             float a = 0.5f * (unitDirection.y() + 1.0f);
 
-            return (1.0f - a) * Color(1.0f, 1.0f, 1.0f) + a * Color(0.5f, 0.7f, 1.0f);
+            return (1.0f - a) * Color(1) + a * Color(0.5f, 0.7f, 1.0f);
         }
     
     
     public:
         float   aspectRatio     = 1.0f;
+        float   verticalFOV     = 90.0f;
         int     imageWidth      = 100;
         int     samplesPerPixel = 10;
         int     maxDepth        = 10;
+        Point3  lookfrom        = Point3(0);
+        Point3  lookat          = Point3(0, 0, -1);
+        Vector3 vup             = Vector3(0, 1, 0);
 
         void render(const Hittable& world)
         {

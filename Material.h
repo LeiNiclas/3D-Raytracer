@@ -100,13 +100,9 @@ class DielectricMaterial : public Material
             Vector3 direction;
 
             if (cannotRefract || reflectance(cosTheta, ri) > randomFloat())
-            {
                 direction = reflect(unitDirection, record.normal);
-            }
             else
-            {
                 direction = refract(unitDirection, -record.normal, ri);
-            }
 
             scattered = Ray(record.p, direction);
 
