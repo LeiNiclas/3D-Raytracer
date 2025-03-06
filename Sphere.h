@@ -33,11 +33,11 @@ class Sphere : public Hittable
             // Calculate the nearest root in accepted range
             float solution = (h - discriminant) / a;
 
-            if (!rayT.surronds(solution))
+            if (!rayT.surrounds(solution))
             {
-                solution = (h + discriminant);
+                solution = (h + discriminant) / a;
                 
-                if (!rayT.surronds(solution))
+                if (!rayT.surrounds(solution))
                     return false;
             }
 

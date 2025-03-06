@@ -194,4 +194,14 @@ inline Vector3 reflect(const Vector3& v, const Vector3& normal)
     return v - 2.0f * dotP(v, normal) * normal;
 }
 
+inline Vector3 refract(const Vector3& v, const Vector3& normal, float etaInOverEtaOut)
+{
+    float cosTheta = std::fmin(dotP(-v, normal), 1.0f);
+    
+    Vector3 perpendicular = etaInOverEtaOut * (v + cosTheta * normal);
+    Vector3 parallel = std::sqrt(std::fabs(1.0f - dotP(perpendicular, perpendicular))) * normal;
+
+    return perpendicular + parallel;
+}
+
 #endif

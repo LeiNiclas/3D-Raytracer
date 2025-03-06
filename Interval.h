@@ -20,7 +20,7 @@ class Interval
         bool contains(float x) const { return min <= x && x <= max; }
 
         // Open interval; same as contains() but without limit-values.
-        bool surronds(float x) const { return min < x && x < max; }
+        bool surrounds(float x) const { return min < x && x < max; }
 
         float clamp(float x) const
         {

@@ -67,7 +67,7 @@ class Camera
             HitRecord record;
 
             // Objects of the world
-            if (world.hit(ray, Interval(0.001, infinity), record))
+            if (world.hit(ray, Interval(0.0001, infinity), record))
             {
                 Ray scattered;
                 Color attenuation;
@@ -107,7 +107,7 @@ class Camera
             
                 for (int x = 0; x < imageWidth; x++)
                 {
-                    Color pixelColor(0, 0, 0);
+                    Color pixelColor = Color(0.0f);
 
                     for (int i = 0; i < samplesPerPixel; i++)
                     {

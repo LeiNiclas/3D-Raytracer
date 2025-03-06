@@ -6,20 +6,21 @@
 
 class Material;
 
-struct HitRecord
+class HitRecord
 {
-    Point3 p;
-    Vector3 normal;
-    shared_ptr<Material> mat;
-    float t;
-    bool isFrontFace;
-
-    void setFaceNormal(const Ray& ray, const Vector3& outwardNormal)
-    {
-        // outwarNormal is required to have unit length.
-        isFrontFace = dotP(ray.direction(), outwardNormal) < 0;
-        normal = isFrontFace ? outwardNormal : -outwardNormal;
-    }
+    public:
+        Point3 p;
+        Vector3 normal;
+        shared_ptr<Material> mat;
+        float t;
+        bool isFrontFace;
+    
+        void setFaceNormal(const Ray& ray, const Vector3& outwardNormal)
+        {
+            // outwarNormal is required to have unit length.
+            isFrontFace = dotP(ray.direction(), outwardNormal) < 0;
+            normal = isFrontFace ? outwardNormal : -outwardNormal;
+        }
 };
 
 

@@ -12,7 +12,7 @@ class Material
         virtual bool scatter
         (
             const Ray& ray,
-            const HitRecord record,
+            const HitRecord& record,
             Color& attenuation,
             Ray& scattered
         ) const
@@ -31,7 +31,7 @@ class LambertianMaterial : public Material
     public:
         LambertianMaterial(const Color& albedo) : albedo(albedo) {}
 
-        bool scatter ( const Ray& ray, const HitRecord record, Color& attenuation, Ray& scattered) const override
+        bool scatter(const Ray& ray, const HitRecord& record, Color& attenuation, Ray& scattered) const override
         {
             Vector3 scatterDirection = record.normal + randomUnitVector();
 
@@ -55,7 +55,7 @@ class MetalMaterial : public Material
     public:
         MetalMaterial(const Color& albedo, float fuzz) : albedo(albedo), fuzz(fuzz) {}
 
-        bool scatter ( const Ray& ray, const HitRecord record, Color& attenuation, Ray& scattered) const override
+        bool scatter(const Ray& ray, const HitRecord& record, Color& attenuation, Ray& scattered) const override
         {
             Vector3 reflected = reflect(ray.direction(), record.normal);
             reflected = normalized(reflected) + (fuzz * randomUnitVector());
@@ -63,6 +63,53 @@ class MetalMaterial : public Material
             scattered = Ray(record.p, reflected);
             attenuation = albedo;
             
+            return true;
+        }
+};
+
+
+class DielectricMaterial : public Material
+{
+    private:
+        float refractionIndex;
+
+        static float reflectance(float cos, float refractionIndex)
+        {
+            float r0 = (1.0f - refractionIndex) / (1.0f + refractionIndex);
+            r0 = r0 * r0;
+
+            return r0 + (1.0f - r0) * std::pow((1.0f - cos), 5.0f);
+        }
+
+    
+    public:
+        DielectricMaterial(float refractionIndex) : refractionIndex(refractionIndex) {}
+
+        bool scatter(const Ray& ray, const HitRecord& record, Color& attenuation, Ray& scattered) const override
+        {
+            attenuation = Color(1.0f);
+            
+            float ri = record.isFrontFace ? (1.0f / refractionIndex) : refractionIndex;
+
+            Vector3 unitDirection = normalized(ray.direction());
+            float cosTheta = std::fmin(dotP(-unitDirection, record.normal), 1.0f);
+            float sinTheta = std::sqrt(1.0f - cosTheta * cosTheta);
+
+            bool cannotRefract = ri * sinTheta > 1.0f;
+
+            Vector3 direction;
+
+            if (cannotRefract || reflectance(cosTheta, ri) > randomFloat())
+            {
+                direction = reflect(unitDirection, record.normal);
+            }
+            else
+            {
+                direction = refract(unitDirection, -record.normal, ri);
+            }
+
+            scattered = Ray(record.p, direction);
+
             return true;
         }
 };
