@@ -177,7 +177,7 @@ inline Vector3 randomUnitVector()
 
 /// @brief Generate a random vector pointing away from a surface.
 /// @param normal The normal of the surface.
-/// @return new vector where its dot product with the normal is < 0. 
+/// @return new vector where its dot product with the normal is > 0. 
 inline Vector3 randomOnHemisphere(const Vector3& normal)
 {
     Vector3 onSurfaceVector = randomUnitVector();
@@ -186,6 +186,19 @@ inline Vector3 randomOnHemisphere(const Vector3& normal)
         return onSurfaceVector;
     else
         return onSurfaceVector;
+}
+
+/// @brief Generate a random point inside a unit disk.
+/// @return new vector inside a uinit disk.
+inline Vector3 randomInUnitDisk()
+{
+    while (true)
+    {
+        Vector3 p = Vector3(randomFloat(-1, 1), randomFloat(-1, 1), 0);
+
+        if (dotP(p, p) < 1)
+            return p;
+    }
 }
 
 

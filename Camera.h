@@ -17,6 +17,8 @@ class Camera
         Vector3 u;
         Vector3 v;
         Vector3 w;
+        Vector3 defocusDiskHorizontal;
+        Vector3 defocusDiskVertical;
 
 
         void init()
@@ -27,10 +29,9 @@ class Camera
             center = lookfrom;
 
             // Viewport properties
-            float focalLength = (lookfrom - lookat).magnitude();
             float theta = deg2rad(verticalFOV);
             float h = std::tan(theta / 2.0f);
-            float viewportHeight = 2.0f * h * focalLength;
+            float viewportHeight = 2.0f * h * focusDistance;
             float viewportWidth = viewportHeight * (float(imageWidth) / imageHeight);
             
             w = normalized(lookfrom - lookat);
@@ -44,11 +45,15 @@ class Camera
             pixelDeltaY = viewportHeightVector / imageHeight;
             
             Vector3 viewportUpperLeft = center -
-                                        (focalLength * w) -
+                                        (focusDistance * w) -
                                         viewportWidthVector / 2.0f -
                                         viewportHeightVector / 2.0f;
             
             centerPixelPosition = viewportUpperLeft + 0.5f * (pixelDeltaX + pixelDeltaY);
+
+            float defocusRadius = focusDistance * std::tan(deg2rad(defocusAngle / 2));
+            defocusDiskHorizontal = u * defocusRadius;
+            defocusDiskVertical = v * defocusRadius;
         }
 
 
@@ -59,7 +64,7 @@ class Camera
                                     ((x + offset.x()) * pixelDeltaX) +
                                     ((y + offset.y()) * pixelDeltaY);
             
-            Point3 rayOrigin = center;
+            Point3 rayOrigin = (defocusAngle <= 0) ? center : defocusDiskSample();
             Vector3 rayDirection = pixelSample - rayOrigin;
 
             return Ray(rayOrigin, rayDirection);
@@ -67,6 +72,11 @@ class Camera
 
         Vector3 sampleSquare() const { return Vector3(randomFloat() - 0.5f, randomFloat() - 0.5f, 0); }
 
+        Point3 defocusDiskSample() const
+        {
+            Vector3 p = randomInUnitDisk();
+            return center + (p.x() * defocusDiskHorizontal) + (p.y() * defocusDiskVertical);
+        }
 
         Color rayColor(const Ray& ray, int depth, const Hittable& world) const
         {
@@ -99,6 +109,8 @@ class Camera
     public:
         float   aspectRatio     = 1.0f;
         float   verticalFOV     = 90.0f;
+        float   defocusAngle    = 0.0f;
+        float   focusDistance   = 10.0f;
         int     imageWidth      = 100;
         int     samplesPerPixel = 10;
         int     maxDepth        = 10;

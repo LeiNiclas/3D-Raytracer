@@ -1,0 +1,35 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "build",
+        "type": "shell",
+        "command": "g++",
+        "args": [
+          "-g",
+          "${workspaceFolder}/main.cc",
+          "-o",
+          "${workspaceFolder}/build/Debug/outDebug"
+        ],
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "problemMatcher": ["$gcc"]
+      },
+      {
+        "label": "build-and-run",
+        "type": "shell",
+        "command": "powershell",
+        "args": [
+          "-Command",
+          "& { g++ -g ${workspaceFolder}/main.cc -o ${workspaceFolder}/build/Debug/outDebug; ${workspaceFolder}/build/Debug/outDebug.exe | Set-Content image.ppm -Encoding String }"
+        ],
+        "group": {
+          "kind": "build",
+          "isDefault": false
+        },
+        "problemMatcher": ["$gcc"]
+      }
+    ]
+  }
