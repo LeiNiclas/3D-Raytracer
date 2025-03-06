@@ -3,10 +3,14 @@
 
 #include "Utilities.h"
 
+
+class Material;
+
 struct HitRecord
 {
     Point3 p;
     Vector3 normal;
+    shared_ptr<Material> mat;
     float t;
     bool isFrontFace;
 

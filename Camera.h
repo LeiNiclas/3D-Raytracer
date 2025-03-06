@@ -2,6 +2,7 @@
 #define CAMERA_H
 
 #include "Hittable.h"
+#include "Material.h"
 
 
 class Camera
@@ -68,8 +69,13 @@ class Camera
             // Objects of the world
             if (world.hit(ray, Interval(0.001, infinity), record))
             {
-                Vector3 direction = record.normal + randomUnitVector();
-                return 0.6f * rayColor(Ray(record.p, direction), depth-1, world);
+                Ray scattered;
+                Color attenuation;
+
+                if (record.mat->scatter(ray, record, attenuation, scattered))
+                    return attenuation * rayColor(scattered, depth-1, world);
+                
+                return Color(0.0f);
             }
 
             Vector3 unitDirection = normalized(ray.direction());

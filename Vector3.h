@@ -54,6 +54,15 @@ class Vector3
             );
         }
 
+        bool nearZero() const
+        {
+            float threshold = 1e-8;
+
+            return  std::fabs(values[0]) < threshold &&
+                    std::fabs(values[1]) < threshold &&
+                    std::fabs(values[2]) < threshold;
+        }
+
         /// @brief Generate a vector with random components between 0 and 1.
         /// @return A vector with random components between 0 and 1.
         static Vector3 randomVector()
@@ -90,6 +99,16 @@ inline Vector3 operator+(const Vector3& v1, const Vector3& v2)
 inline Vector3 operator-(const Vector3& v1, const Vector3& v2)
 {
     return v1 + (-v2);
+}
+
+inline Vector3 operator*(const Vector3& v1, const Vector3& v2)
+{
+    return Vector3
+    (
+        v1.values[0] * v2.values[0],
+        v1.values[1] * v2.values[1],
+        v1.values[2] * v2.values[2]
+    );
 }
 
 inline Vector3 operator*(float s, const Vector3& v)
@@ -167,6 +186,12 @@ inline Vector3 randomOnHemisphere(const Vector3& normal)
         return onSurfaceVector;
     else
         return onSurfaceVector;
+}
+
+
+inline Vector3 reflect(const Vector3& v, const Vector3& normal)
+{
+    return v - 2.0f * dotP(v, normal) * normal;
 }
 
 #endif
