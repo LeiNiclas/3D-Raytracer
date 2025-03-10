@@ -1,9 +1,11 @@
+#include "Utilities.h"
+
+#include "BVH.h"
 #include "Camera.h"
 #include "Hittable.h"
 #include "HittableList.h"
 #include "Material.h"
 #include "Sphere.h"
-#include "Utilities.h"
 
 // After building, execute the output file using
 // build\Debug\outDebug.exe | set-content image.ppm -encoding String
@@ -11,11 +13,11 @@
 
 int main()
 {
-    /*
     using Scene = HittableList;
 
+    /*
     Scene finalRender;
-    Scene book2Scene;
+    //Scene book2Scene;
 
     shared_ptr<LambertianMaterial> groundMat = make_shared<LambertianMaterial>(Color(0.4f));
     shared_ptr<MetalMaterial> metalMat = make_shared<MetalMaterial>(Color(0.8f), 0.05f);
@@ -83,7 +85,10 @@ int main()
     cam.defocusAngle = 0;
     cam.focusDistance = 15.0f;
     
+    //finalRender = HittableList(make_shared<BVHNode>(finalRender));
+
     cam.render(finalRender);
+
     */
 
     // Materials
@@ -97,18 +102,20 @@ int main()
     shared_ptr<DielectricMaterial> glassBubbleMat = make_shared<DielectricMaterial>(1.0f / 1.5f);
 
     // World properties
-    HittableList world;
+    Scene world;
     world.add(make_shared<Sphere>(Point3(0, 0, -1.25f), 0.5f, goldMetalMat));
     world.add(make_shared<Sphere>(Point3(0, -100.5f, -1), 100, grayMat));
-    world.add(make_shared<Sphere>(Point3(-0.5f, 0.75f, -1), Point3(0.5f, 0.75f, -1), 0.25f, redMetalMat));
+    // world.add(make_shared<Sphere>(Point3(-0.5f, 0.75f, -1), Point3(0.5f, 0.75f, -1), 0.25f, redMetalMat));
     world.add(make_shared<Sphere>(Point3(-1, 0, -1), 0.5f, greyMetalMat));
     world.add(make_shared<Sphere>(Point3(1, 0, -1), 0.5f, glassMat));
+
+    world = Scene(make_shared<BVHNode>(world));
 
     Camera cam;
 
     // Adjust camera settings
     cam.aspectRatio = 16.0f / 9.0f;
-    cam.imageWidth = 640;
+    cam.imageWidth = 320;
     cam.samplesPerPixel = 200;
     cam.maxDepth = 50;
 

@@ -1,7 +1,7 @@
 #ifndef HITTABLE_H
 #define HITTABLE_H
 
-#include "Utilities.h"
+#include "AAlignedBBox.h"
 
 
 class Material;
@@ -30,6 +30,8 @@ class Hittable
         virtual ~Hittable() = default;
 
         virtual bool hit(const Ray& ray, Interval rayT, HitRecord& record) const = 0;
+
+        virtual AAlignedBBox boundingBox() const = 0;
 };
 
 

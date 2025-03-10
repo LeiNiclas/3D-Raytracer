@@ -13,6 +13,12 @@ class Interval
 
         Interval() : min(infinity), max(-infinity) {}
         Interval(float min, float max) : min(min), max(max) {}
+        Interval(const Interval& a, const Interval& b)
+        {
+            min = (a.min <= b.min) ? a.min : b.min;
+            max = (a.max >= b.max) ? a.max : b.max;
+        }
+
 
         float size() const { return max - min; }
 
@@ -29,6 +35,13 @@ class Interval
             if (x > max)
                 return max;
             return x;
+        }
+
+        Interval expand(float delta) const
+        {
+            float padding = delta / 2.0f;
+            
+            return Interval(min - padding, max + padding);
         }
 };
 

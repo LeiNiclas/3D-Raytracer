@@ -10,12 +10,23 @@ class Sphere : public Hittable
         Ray center;
         float radius;
         shared_ptr<Material> mat;
+        AAlignedBBox bbox;
 
     public:
         Sphere(const Point3& center, float radius, shared_ptr<Material> mat)
-        : center(center, Vector3(0)), radius(radius), mat(mat) {}
+        : center(center, Vector3(0)), radius(radius), mat(mat)
+        {
+            bbox = AAlignedBBox(center - Vector3(radius), center + Vector3(radius));
+        }
+
         Sphere(const Point3& startCenter, const Point3& endCenter, float radius, shared_ptr<Material> mat)
-        : center(startCenter, endCenter - startCenter), radius(radius), mat(mat) {}
+        : center(startCenter, endCenter - startCenter), radius(radius), mat(mat)
+        {
+            AAlignedBBox bbox1 = AAlignedBBox(center.at(0) - Vector3(radius), center.at(0) + Vector3(radius));
+            AAlignedBBox bbox2 = AAlignedBBox(center.at(1) - Vector3(radius), center.at(1) + Vector3(radius));
+
+            bbox = AAlignedBBox(bbox1, bbox2);
+        }
 
         bool hit(const Ray& ray, Interval rayT, HitRecord& record) const override
         {
@@ -52,6 +63,8 @@ class Sphere : public Hittable
 
             return true;
         }
+
+        AAlignedBBox boundingBox() const override { return bbox; }
 };
 
 
