@@ -6,6 +6,7 @@
 #include "HittableList.h"
 #include "Material.h"
 #include "Sphere.h"
+#include "Texture.h"
 
 // After building, execute the output file using
 // build\Debug\outDebug.exe | set-content image.ppm -encoding String
@@ -100,11 +101,13 @@ int main()
     shared_ptr<MetalMaterial> redMetalMat = make_shared<MetalMaterial>(Color(0.9f, 0.2f, 0.1f), 0.2f);
     shared_ptr<DielectricMaterial> glassMat = make_shared<DielectricMaterial>(1.5f);
     shared_ptr<DielectricMaterial> glassBubbleMat = make_shared<DielectricMaterial>(1.0f / 1.5f);
+    auto checkerTex = make_shared<CheckerTexture>(0.75f, Color(0.1f), Color(0.9f));
 
     // World properties
     Scene world;
+
     world.add(make_shared<Sphere>(Point3(0, 0, -1.25f), 0.5f, goldMetalMat));
-    world.add(make_shared<Sphere>(Point3(0, -100.5f, -1), 100, grayMat));
+    world.add(make_shared<Sphere>(Point3(0, -250.5f, -1), 250, make_shared<LambertianMaterial>(checkerTex)));
     // world.add(make_shared<Sphere>(Point3(-0.5f, 0.75f, -1), Point3(0.5f, 0.75f, -1), 0.25f, redMetalMat));
     world.add(make_shared<Sphere>(Point3(-1, 0, -1), 0.5f, greyMetalMat));
     world.add(make_shared<Sphere>(Point3(1, 0, -1), 0.5f, glassMat));
@@ -115,8 +118,8 @@ int main()
 
     // Adjust camera settings
     cam.aspectRatio = 16.0f / 9.0f;
-    cam.imageWidth = 320;
-    cam.samplesPerPixel = 200;
+    cam.imageWidth = 640;
+    cam.samplesPerPixel = 150;
     cam.maxDepth = 50;
 
     cam.verticalFOV = 30.0f;
