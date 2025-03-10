@@ -1,6 +1,8 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
+#include "Image.h"
+
 
 class Texture
 {
@@ -49,6 +51,33 @@ class CheckerTexture : public Texture
             bool isEven = (x + y + z) % 2 == 0;
 
             return isEven ? evenTex->value(u, v, p) : oddTex->value(u, v, p);
+        }
+};
+
+
+class ImageTexture : public Texture
+{
+    private:
+        Image img;
+
+
+    public:
+        ImageTexture(const char* filename) : img(filename) {}
+
+        Color value(float u, float v, const Point3& p) const override
+        {
+            if (img.height() <= 0) return Color(0, 1, 1);
+
+            u = Interval(0, 1).clamp(u);
+            v = 1.0f - Interval(0, 1).clamp(v);
+
+            int i = int(u * img.width());
+            int j = int(v * img.height());
+            const unsigned char* pixel = img.pixelData(i, j);
+
+            float colorScale = 1.0f / 255.0f;
+            
+            return Color(colorScale * pixel[0], colorScale * pixel[1], colorScale * pixel[2]);
         }
 };
 

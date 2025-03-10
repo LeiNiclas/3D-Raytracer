@@ -124,9 +124,9 @@ void experimentalScene()
     cam.samplesPerPixel = 300;
     cam.maxDepth = 50;
 
-    cam.verticalFOV = 25.0f;
-    cam.lookfrom = Point3(0, 2.25f, 6);
-    cam.lookat = Point3(0, 0.25f, -1);
+    cam.verticalFOV = 21.25f;
+    cam.lookfrom = Point3(3, 2.25f, 6);
+    cam.lookat = Point3(0, 0, -1);
     cam.vup = Vector3(0, 1, 0);
 
     cam.defocusAngle = 0.0f;
@@ -163,8 +163,33 @@ void checkeredSpheres()
 }
 
 
+void earthSphere()
+{
+    auto earthTexture = make_shared<ImageTexture>("EarthUV.png");
+    auto earthSurface = make_shared<LambertianMaterial>(earthTexture);
+    auto globe = make_shared<Sphere>(Point3(0), 2, earthSurface);
+
+    Camera cam;
+
+    cam.aspectRatio = 16.0f / 9.0f;
+    cam.imageWidth = 640;
+    cam.samplesPerPixel = 100;
+    cam.maxDepth = 50;
+
+    cam.verticalFOV = 25;
+    cam.lookfrom = Point3(0, 0, 10);
+    cam.lookat = Point3(0);
+    cam.vup = Vector3(0, 1, 0);
+
+    cam.defocusAngle = 0;
+
+    cam.render(Scene(globe));
+}
+
+
 int main()
 {
-    experimentalScene();
+    //experimentalScene();
+    earthSphere();
 }
 
