@@ -49,12 +49,13 @@ class LambertianMaterial : public Material
 class MetalMaterial : public Material
 {
     private:
-        Color albedo;
         float fuzz;
+        shared_ptr<Texture> tex;
     
 
     public:
-        MetalMaterial(const Color& albedo, float fuzz) : albedo(albedo), fuzz(fuzz) {}
+        MetalMaterial(const Color& albedo, float fuzz) : fuzz(fuzz), tex(make_shared<SolidColorTexture>(albedo)) {}
+        MetalMaterial(shared_ptr<Texture> texture, float fuzz) : tex(texture), fuzz(fuzz) {}
 
         bool scatter(const Ray& ray, const HitRecord& record, Color& attenuation, Ray& scattered) const override
         {
@@ -62,7 +63,7 @@ class MetalMaterial : public Material
             reflected = normalized(reflected) + (fuzz * randomUnitVector());
             
             scattered = Ray(record.p, reflected, ray.time());
-            attenuation = albedo;
+            attenuation = tex->value(record.u, record.v, record.p);
             
             return true;
         }

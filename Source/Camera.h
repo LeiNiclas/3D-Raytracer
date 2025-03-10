@@ -4,6 +4,9 @@
 #include "Hittable.h"
 #include "Material.h"
 
+#include <chrono>
+#include <iomanip>
+
 
 class Camera
 {
@@ -123,13 +126,21 @@ class Camera
         {
             init();
 
+            auto renderStartTime = std::chrono::high_resolution_clock::now();
+
             std::cout << "P3\n" << imageWidth << " " << imageHeight << "\n255\n";
 
     
             for (int y = 0; y < imageHeight; y++)
             {
-                std::clog << "\rProcessing... (row " << y+1 << " of " << imageHeight << ")"
-                          << std::flush; 
+                auto renderCurrentTime = std::chrono::high_resolution_clock::now();
+                std::chrono::duration<float> renderElapsedTime = renderCurrentTime - renderStartTime;
+                int renderMinutes = static_cast<int>(renderElapsedTime.count()) / 60;
+                int renderSeconds = static_cast<int>(renderElapsedTime.count()) % 60;
+
+                std::clog << "\rProcessing... (row " << y+1 << " of " << imageHeight << ") "
+                          << std::setw(2) << std::setfill('0') << renderMinutes << ":"
+                          << std::setw(2) << std::setfill('0') << renderSeconds << " elapsed." << std::flush; 
             
                 for (int x = 0; x < imageWidth; x++)
                 {
@@ -144,8 +155,16 @@ class Camera
                     writeColor(std::cout, pixelSampleScale * pixelColor);
                 }
             }
+
+            auto renderEndTime = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<float> renderTotalTime = renderEndTime - renderStartTime;
+            int renderTotalMinutes = static_cast<int>(renderTotalTime.count()) / 60;
+            int renderTotalSeconds = static_cast<int>(renderTotalTime.count()) % 60;
+
         
-            std::clog << "\rDone.                           \n";
+            std::clog << "\rDone. Render time: "
+            << std::setw(2) << std::setfill('0') << renderTotalMinutes << ":"
+            << std::setw(2) << std::setfill('0') << renderTotalSeconds << ".                   ";
         }
 };
 

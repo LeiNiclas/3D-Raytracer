@@ -2,6 +2,7 @@
 #define TEXTURE_H
 
 #include "Image.h"
+#include "Perlin.h"
 
 
 class Texture
@@ -81,5 +82,22 @@ class ImageTexture : public Texture
         }
 };
 
+
+class NoiseTexture : public Texture
+{
+    private:
+        Perlin noise;
+        float scale;
+        float turbulence;
+
+
+    public:
+        NoiseTexture(float scale, float turbulence) : scale(scale), turbulence(turbulence) {}
+
+        Color value(float u, float v, const Point3& p) const override
+        {
+            return Color(0.5f) * (1 + std::sin(scale * p.z() + 10.0f * noise.turbulence(p, turbulence)));
+        }
+};
 
 #endif

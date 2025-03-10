@@ -8,8 +8,6 @@
 #include "Sphere.h"
 #include "Texture.h"
 
-// After building, execute the output file using
-// build\Debug\outDebug.exe | set-content image.ppm -encoding String
 
 using Scene = HittableList;
 
@@ -187,9 +185,37 @@ void earthSphere()
 }
 
 
+void perlinSpheres()
+{
+    Scene world;
+
+    auto perlinTexture = make_shared<NoiseTexture>(5, 7);
+
+    world.add(make_shared<Sphere>(Point3(0, -250, 0), 250, make_shared<MetalMaterial>(perlinTexture, 0.35f)));
+    world.add(make_shared<Sphere>(Point3(0, 2, 0), 2, make_shared<MetalMaterial>(perlinTexture, 0.35f)));
+
+    Camera cam;
+
+    cam.aspectRatio = 16.0f / 9.0f;
+    cam.imageWidth = 640;
+    cam.samplesPerPixel = 200;
+    cam.maxDepth = 50;
+
+    cam.verticalFOV = 30;
+    cam.lookfrom = Point3(13, 4, 3);
+    cam.lookat = Point3(0);
+    cam.vup = Point3(0, 1, 0);
+
+    cam.defocusAngle = 0;
+
+    cam.render(world);
+}
+
+
 int main()
 {
     //experimentalScene();
-    earthSphere();
+    //earthSphere();
+    perlinSpheres();
 }
 
