@@ -73,6 +73,7 @@ class DielectricMaterial : public Material
 {
     private:
         float refractionIndex;
+        Color tint;
 
         static float reflectance(float cos, float refractionIndex)
         {
@@ -84,11 +85,12 @@ class DielectricMaterial : public Material
 
     
     public:
-        DielectricMaterial(float refractionIndex) : refractionIndex(refractionIndex) {}
+        DielectricMaterial(float refractionIndex) : refractionIndex(refractionIndex), tint(Color(1)) {}
+        DielectricMaterial(float refractionIndex, Color tint) : refractionIndex(refractionIndex), tint(tint) {}
 
         bool scatter(const Ray& ray, const HitRecord& record, Color& attenuation, Ray& scattered) const override
         {
-            attenuation = Color(1.0f);
+            attenuation = tint;
             
             float ri = record.isFrontFace ? (1.0f / refractionIndex) : refractionIndex;
 

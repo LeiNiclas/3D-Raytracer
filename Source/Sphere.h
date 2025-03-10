@@ -12,6 +12,15 @@ class Sphere : public Hittable
         shared_ptr<Material> mat;
         AAlignedBBox bbox;
 
+        static void getSphereUV(const Point3& p, float& u, float& v)
+        {
+            float theta = std::acos(-p.y());
+            float phi = std::atan2(-p.z(), p.x()) + pi;
+
+            u = phi / (2 * pi);
+            v = theta / pi;
+        }
+
     public:
         Sphere(const Point3& center, float radius, shared_ptr<Material> mat)
         : center(center, Vector3(0)), radius(radius), mat(mat)
@@ -60,6 +69,7 @@ class Sphere : public Hittable
             Vector3 outwardNormal = (record.p - currentCenter) / radius;
             record.setFaceNormal(ray, outwardNormal);
             record.mat = mat;
+            getSphereUV(outwardNormal, record.u, record.v);
 
             return true;
         }

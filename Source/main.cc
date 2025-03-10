@@ -11,14 +11,12 @@
 // After building, execute the output file using
 // build\Debug\outDebug.exe | set-content image.ppm -encoding String
 
+using Scene = HittableList;
 
-int main()
+
+void finalRenderBook1()
 {
-    using Scene = HittableList;
-
-    /*
     Scene finalRender;
-    //Scene book2Scene;
 
     shared_ptr<LambertianMaterial> groundMat = make_shared<LambertianMaterial>(Color(0.4f));
     shared_ptr<MetalMaterial> metalMat = make_shared<MetalMaterial>(Color(0.8f), 0.05f);
@@ -86,31 +84,35 @@ int main()
     cam.defocusAngle = 0;
     cam.focusDistance = 15.0f;
     
-    //finalRender = HittableList(make_shared<BVHNode>(finalRender));
+    finalRender = HittableList(make_shared<BVHNode>(finalRender));
 
     cam.render(finalRender);
+}
 
-    */
+
+void experimentalScene()
+{
 
     // Materials
     shared_ptr<LambertianMaterial> groundMat = make_shared<LambertianMaterial>(Color(0.2f, 0.9f, 0.1f));
     shared_ptr<LambertianMaterial> whiteMat = make_shared<LambertianMaterial>(Color(1));
-    shared_ptr<LambertianMaterial> grayMat = make_shared<LambertianMaterial>(Color(0.3f));
-    shared_ptr<MetalMaterial> greyMetalMat = make_shared<MetalMaterial>(Color(0.6f), 0.05f);
+    shared_ptr<MetalMaterial> mirrorMat = make_shared<MetalMaterial>(Color(0.6f), 0.01f);
     shared_ptr<MetalMaterial> goldMetalMat = make_shared<MetalMaterial>(Color(0.85f, 0.6f, 0.2f), 0.05f);
-    shared_ptr<MetalMaterial> redMetalMat = make_shared<MetalMaterial>(Color(0.9f, 0.2f, 0.1f), 0.2f);
-    shared_ptr<DielectricMaterial> glassMat = make_shared<DielectricMaterial>(1.5f);
+    shared_ptr<DielectricMaterial> orangeGlassMat = make_shared<DielectricMaterial>(1.5f, Color(1.0f, 0.8f, 0.65f));
     shared_ptr<DielectricMaterial> glassBubbleMat = make_shared<DielectricMaterial>(1.0f / 1.5f);
+    shared_ptr<DielectricMaterial> blueGlassMat = make_shared<DielectricMaterial>(1.5f, Color(0.7f, 0.95f, 1.0f));
     auto checkerTex = make_shared<CheckerTexture>(0.75f, Color(0.1f), Color(0.9f));
 
     // World properties
     Scene world;
 
     world.add(make_shared<Sphere>(Point3(0, 0, -1.25f), 0.5f, goldMetalMat));
+    world.add(make_shared<Sphere>(Point3(0, 0, 0), 0.5f, blueGlassMat));
+    world.add(make_shared<Sphere>(Point3(0, 0, 0), 0.45f, glassBubbleMat));
     world.add(make_shared<Sphere>(Point3(0, -250.5f, -1), 250, make_shared<LambertianMaterial>(checkerTex)));
     // world.add(make_shared<Sphere>(Point3(-0.5f, 0.75f, -1), Point3(0.5f, 0.75f, -1), 0.25f, redMetalMat));
-    world.add(make_shared<Sphere>(Point3(-1, 0, -1), 0.5f, greyMetalMat));
-    world.add(make_shared<Sphere>(Point3(1, 0, -1), 0.5f, glassMat));
+    world.add(make_shared<Sphere>(Point3(-1, 0, -1), 0.5f, mirrorMat));
+    world.add(make_shared<Sphere>(Point3(1, 0, -1), 0.5f, orangeGlassMat));
 
     world = Scene(make_shared<BVHNode>(world));
 
@@ -119,11 +121,11 @@ int main()
     // Adjust camera settings
     cam.aspectRatio = 16.0f / 9.0f;
     cam.imageWidth = 640;
-    cam.samplesPerPixel = 150;
+    cam.samplesPerPixel = 300;
     cam.maxDepth = 50;
 
-    cam.verticalFOV = 30.0f;
-    cam.lookfrom = Point3(0, 2, 3);
+    cam.verticalFOV = 25.0f;
+    cam.lookfrom = Point3(0, 2.25f, 6);
     cam.lookat = Point3(0, 0.25f, -1);
     cam.vup = Vector3(0, 1, 0);
 
@@ -132,3 +134,37 @@ int main()
 
     cam.render(world);
 }
+
+
+void checkeredSpheres()
+{
+    Scene world;
+
+    auto checkerTex = make_shared<CheckerTexture>(0.5f, Color(0.1f), Color(0.9f));
+
+    world.add(make_shared<Sphere>(Point3(0, -10, 0), 10, make_shared<LambertianMaterial>(checkerTex)));
+    world.add(make_shared<Sphere>(Point3(0, 10, 0), 10, make_shared<LambertianMaterial>(checkerTex)));
+
+    Camera cam;
+
+    cam.aspectRatio = 16.0f / 9.0f;
+    cam.imageWidth = 320;
+    cam.samplesPerPixel = 100;
+    cam.maxDepth = 50;
+
+    cam.verticalFOV = 20;
+    cam.lookfrom = Point3(13, 2, 3);
+    cam.lookat = Point3(0, 0, 0);
+    cam.vup = Vector3(0, 1, 0);
+
+    cam.defocusAngle = 0;
+
+    cam.render(world);
+}
+
+
+int main()
+{
+    experimentalScene();
+}
+
