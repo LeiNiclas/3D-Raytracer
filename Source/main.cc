@@ -5,10 +5,8 @@
 #include "Hittable.h"
 #include "HittableList.h"
 #include "Material.h"
-#include "Quad.h"
-#include "Sphere.h"
+#include "Primitives.h"
 #include "Texture.h"
-#include "Triangle.h"
 
 
 using Scene = HittableList;
@@ -337,6 +335,54 @@ void simpleLight()
 }
 
 
+void cornellBox()
+{
+    Scene world;
+
+    auto redMaterial = make_shared<LambertianMaterial>(Color(0.75f, 0.05f, 0.05f));
+    auto greenMaterial = make_shared<LambertianMaterial>(Color(0.05f, 0.75f, 0.05f));
+    auto whiteMaterial = make_shared<LambertianMaterial>(Color(0.75f));
+    auto lightMaterial = make_shared<DiffuseLightMaterial>(Color(10));
+
+    // Green wall (left)
+    world.add(make_shared<Quad>(Point3(55.5f, 0, 0), Vector3(0, 55.5f, 0), Vector3(0, 0, 55.5f), greenMaterial));
+    // Red wall (right)
+    world.add(make_shared<Quad>(Point3(0), Vector3(0, 55.5f, 0), Vector3(0, 0, 55.5f), redMaterial));
+    // White wall (bottom)
+    world.add(make_shared<Quad>(Point3(0), Vector3(55.5f, 0, 0), Vector3(0, 0, 55.5f), whiteMaterial));
+    // White wall (top)
+    world.add(make_shared<Quad>(Point3(55.5f), Vector3(-55.5f, 0, 0), Vector3(0, 0, -55.5f), whiteMaterial));
+    // White wall (back)
+    world.add(make_shared<Quad>(Point3(0, 0, 55.5f), Vector3(55.5f, 0, 0), Vector3(0, 55.5f, 0), whiteMaterial));
+    // Emissive light
+    world.add(make_shared<Quad>(Point3(34.3f, 55.4f, 34.3f), Vector3(-13.0f, 0, 0), Vector3(0, 0, -10.5f), lightMaterial));
+    // Small box
+    world.add(Box(Point3(13.0f, 0, 6.5f), Point3(29.5f, 16.5f, 23.0f), whiteMaterial));
+    // Bigger box
+    world.add(Box(Point3(26.5f, 0, 29.5f), Point3(43.0f, 33.0f, 46.0f), whiteMaterial));
+
+    world = Scene(make_shared<BVHNode>(world));
+
+    Camera cam;
+
+    cam.aspectRatio = 1;
+    cam.imageWidth = 400;
+    cam.samplesPerPixel = 1000;
+    cam.maxDepth = 100;
+    
+    cam.verticalFOV = 40;
+    cam.lookfrom = Point3(27.8f, 27.8f, -80);
+    cam.lookat = Point3(27.8f, 27.8f, 0);
+    cam.vup = Vector3(0, 1, 0);
+
+    cam.backgroundColor = Color(0);
+
+    cam.defocusAngle = 0;
+
+    cam.render(world);
+}
+
+
 int main()
 {
     //experimentalScene();
@@ -344,6 +390,7 @@ int main()
     //perlinSpheres();
     //quads();
     //tris();
-    simpleLight();
+    //simpleLight();
+    cornellBox();
 }
 
