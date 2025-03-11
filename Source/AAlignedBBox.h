@@ -7,6 +7,17 @@
 
 class AAlignedBBox
 {
+    private:
+        void padToMinimum()
+        {
+            float delta = 0.0001f;
+        
+            if (x.size() < delta) x = x.expand(delta);
+            if (y.size() < delta) y = y.expand(delta);
+            if (z.size() < delta) z = z.expand(delta); 
+        }
+
+
     public:
         static const AAlignedBBox empty;
         static const AAlignedBBox universe;
@@ -18,13 +29,15 @@ class AAlignedBBox
         AAlignedBBox() {}
 
         AAlignedBBox(const Interval& x, const Interval& y, const Interval& z)
-        : x(x), y(y), z(z) {}
+        : x(x), y(y), z(z) { padToMinimum(); }
 
         AAlignedBBox(const Point3& a, const Point3& b)
         {
             x = (a.x() <= b.x()) ? Interval(a.x(), b.x()) : Interval(b.x(), a.x());
             y = (a.y() <= b.y()) ? Interval(a.y(), b.y()) : Interval(b.y(), a.y());
             z = (a.z() <= b.z()) ? Interval(a.z(), b.z()) : Interval(b.z(), a.z());
+
+            padToMinimum();
         }
 
         AAlignedBBox(const AAlignedBBox& bbox1, const AAlignedBBox& bbox2)
@@ -32,6 +45,8 @@ class AAlignedBBox
             x = Interval(bbox1.x, bbox2.x);
             y = Interval(bbox1.y, bbox2.y);
             z = Interval(bbox1.z, bbox2.z);
+
+            padToMinimum();
         }
 
         const Interval& axisInterval(int n) const

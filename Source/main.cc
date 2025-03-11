@@ -5,6 +5,7 @@
 #include "Hittable.h"
 #include "HittableList.h"
 #include "Material.h"
+#include "Quad.h"
 #include "Sphere.h"
 #include "Texture.h"
 
@@ -212,10 +213,45 @@ void perlinSpheres()
 }
 
 
+void quads()
+{
+    Scene world;
+
+    auto redMat = make_shared<LambertianMaterial>(Color(1.0f, 0.3f, 0.3f));
+    auto yellowMat = make_shared<LambertianMaterial>(Color(0.8f, 0.8f, 0.4f));
+    auto greenMat = make_shared<LambertianMaterial>(Color(0.3f, 1.0f, 0.3f));
+    auto blueMat = make_shared<LambertianMaterial>(Color(0.2f, 0.2f, 1.0f));
+    auto mirrorMat = make_shared<MetalMaterial>(Color(1), 0.2f);
+
+    world.add(make_shared<Quad>(Point3(-3,-2, 5), Vector3(0, 0, -4), Vector3(0, 4, 0), redMat));
+    world.add(make_shared<Quad>(Point3(-2,-2, 0), Vector3(4, 0, 0), Vector3(0, 4, 0), mirrorMat));
+    world.add(make_shared<Quad>(Point3( 3,-2, 1), Vector3(0, 0, 4), Vector3(0, 4, 0), greenMat));
+    world.add(make_shared<Quad>(Point3(-2, 3, 1), Vector3(4, 0, 0), Vector3(0, 0, 4), yellowMat));
+    world.add(make_shared<Quad>(Point3(-2,-3, 5), Vector3(4, 0, 0), Vector3(0, 0,-4), blueMat));
+
+    Camera cam;
+
+    cam.aspectRatio = 16.0f / 9.0f;
+    cam.imageWidth = 320;
+    cam.samplesPerPixel = 300;
+    cam.maxDepth = 50;
+
+    cam.verticalFOV = 80;
+    cam.lookfrom = Point3(0,0,9);
+    cam.lookat = Point3(0,0,0);
+    cam.vup = Vector3(0,1,0);
+
+    cam.defocusAngle = 0;
+
+    cam.render(world);
+}
+
+
 int main()
 {
     //experimentalScene();
     //earthSphere();
-    perlinSpheres();
+    //perlinSpheres();
+    quads();
 }
 
