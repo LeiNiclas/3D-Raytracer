@@ -1,10 +1,10 @@
-#ifndef QUAD_H
-#define QUAD_H
+#ifndef TRIANGLE_H
+#define TRIANGLE_H
 
 #include "Hittable.h"
 
 
-class Quad : public Hittable
+class Triangle : public Hittable
 {
     private:
         Point3  Q;
@@ -18,7 +18,7 @@ class Quad : public Hittable
 
 
     public:
-        Quad(const Point3& Q, const Vector3& u, const Vector3& v, shared_ptr<Material> mat)
+        Triangle(const Point3& Q, const Vector3& u, const Vector3& v, shared_ptr<Material> mat)
         : Q(Q), u(u), v(v), mat(mat)
         {
             Vector3 n = crossP(u, v);
@@ -31,9 +31,10 @@ class Quad : public Hittable
 
         virtual void setBoundingBox()
         {
-            AAlignedBBox bboxDiagonal1 = AAlignedBBox(Q, Q + u + v);
-            AAlignedBBox bboxDiagonal2 = AAlignedBBox(Q + u, Q + v);
-            bbox = AAlignedBBox(bboxDiagonal1, bboxDiagonal2);
+            AAlignedBBox bboxU = AAlignedBBox(Q, Q + u);
+            AAlignedBBox bboxV = AAlignedBBox(Q, Q + v);
+
+            bbox = AAlignedBBox(bboxU, bboxV);
         }
 
         AAlignedBBox boundingBox() const override { return bbox; }
@@ -67,7 +68,7 @@ class Quad : public Hittable
         {
             Interval unitInterval = Interval(0, 1);
 
-            if (!unitInterval.contains(a) || !unitInterval.contains(b)) return false;
+            if (a < 0 || b < 0 || !unitInterval.contains(a + b)) return false;
 
             record.u = a;
             record.v = b;
