@@ -89,24 +89,20 @@ class Camera
 
             HitRecord record;
 
+            if (!world.hit(ray, Interval(0.0001f, infinity), record))
+                return backgroundColor;
+
             // Objects of the world
-            if (world.hit(ray, Interval(0.0001, infinity), record))
-            {
-                Ray scattered;
-                Color attenuation;
+            Ray scattered;
+            Color attenuation;
+            Color emissionColor = record.mat->emitted(record.u, record.v, record.p);
 
-                if (record.mat->scatter(ray, record, attenuation, scattered))
-                    return attenuation * rayColor(scattered, depth-1, world);
-                
-                return Color(0.0f);
-            }
+            if (!record.mat->scatter(ray, record, attenuation, scattered))
+                return emissionColor;
+            
+            Color scatterColor = attenuation * rayColor(scattered, depth - 1, world);
 
-            Vector3 unitDirection = normalized(ray.direction());
-
-            // Background / skybox
-            float a = 0.5f * (unitDirection.y() + 1.0f);
-
-            return (1.0f - a) * Color(1) + a * Color(0.5f, 0.7f, 1.0f);
+            return emissionColor + scatterColor;
         }
     
     
@@ -121,6 +117,7 @@ class Camera
         Point3  lookfrom        = Point3(0);
         Point3  lookat          = Point3(0, 0, -1);
         Vector3 vup             = Vector3(0, 1, 0);
+        Color   backgroundColor;
 
         void render(const Hittable& world)
         {

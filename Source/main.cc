@@ -83,6 +83,8 @@ void finalRenderBook1()
 
     cam.defocusAngle = 0;
     cam.focusDistance = 15.0f;
+
+    cam.backgroundColor = Color(0.75f, 0.8f, 1);
     
     finalRender = HittableList(make_shared<BVHNode>(finalRender));
 
@@ -132,6 +134,8 @@ void experimentalScene()
     cam.defocusAngle = 0.0f;
     cam.focusDistance = (cam.lookfrom - cam.lookat).magnitude() + 0.25f;
 
+    cam.backgroundColor = Color(0.75f, 0.8f, 1);
+
     cam.render(world);
 }
 
@@ -158,6 +162,10 @@ void checkeredSpheres()
     cam.vup = Vector3(0, 1, 0);
 
     cam.defocusAngle = 0;
+
+    cam.backgroundColor = Color(0.75f, 0.8f, 1);
+
+    world = Scene(make_shared<BVHNode>(world));
 
     cam.render(world);
 }
@@ -210,6 +218,8 @@ void perlinSpheres()
 
     cam.defocusAngle = 0;
 
+    cam.backgroundColor = Color(0.75f, 0.8f, 1);
+
     cam.render(world);
 }
 
@@ -230,6 +240,8 @@ void quads()
     world.add(make_shared<Quad>(Point3(-2, 3, 1), Vector3(4, 0, 0), Vector3(0, 0, 4), yellowMat));
     world.add(make_shared<Quad>(Point3(-2,-3, 5), Vector3(4, 0, 0), Vector3(0, 0,-4), blueMat));
 
+    world = Scene(make_shared<BVHNode>(world));
+
     Camera cam;
 
     cam.aspectRatio = 16.0f / 9.0f;
@@ -243,6 +255,8 @@ void quads()
     cam.vup = Vector3(0,1,0);
 
     cam.defocusAngle = 0;
+
+    cam.backgroundColor = Color(0.75f, 0.8f, 1);
 
     cam.render(world);
 }
@@ -264,6 +278,8 @@ void tris()
     world.add(make_shared<Triangle>(Point3(-2, 3, 1), Vector3(4, 0, 0), Vector3(0, 0, 4), yellowMat));
     world.add(make_shared<Triangle>(Point3(-2,-3, 5), Vector3(4, 0, 0), Vector3(0, 0,-4), blueMat));
 
+    world = Scene(make_shared<BVHNode>(world));
+
     Camera cam;
 
     cam.aspectRatio = 16.0f / 9.0f;
@@ -278,8 +294,48 @@ void tris()
 
     cam.defocusAngle = 0;
 
+    cam.backgroundColor = Color(0.75f, 0.8f, 1);
+
     cam.render(world);
 }
+
+
+void simpleLight()
+{
+    Scene world;
+
+    auto perlinTexture = make_shared<NoiseTexture>(4, 5);
+    
+    world.add(make_shared<Sphere>(Point3(0, 2, 0), 2, make_shared<LambertianMaterial>(perlinTexture)));
+    world.add(make_shared<Quad>(Point3(-200, 0, -200), Vector3(400, 0, 0), Vector3(0, 0, 400), make_shared<LambertianMaterial>(perlinTexture)));
+    
+    auto orangeDiffuseLight = make_shared<DiffuseLightMaterial>(Color(2, 1, 0.5f));
+    auto blueDiffuseLight = make_shared<DiffuseLightMaterial>(Color(0.5f, 1, 2));
+    auto purpleDiffuseLight = make_shared<DiffuseLightMaterial>(Color(1.5f, 0.5f, 1.5f));
+    
+    world.add(make_shared<Quad>(Point3(3, 1, -5), Vector3(2, 0, 0), Vector3(0, 2, 0), orangeDiffuseLight));
+    world.add(make_shared<Quad>(Point3(3, 1, 5), Vector3(2, 0, 0), Vector3(0, 2, 0), purpleDiffuseLight));
+    world.add(make_shared<Sphere>(Point3(0, 7, 0), 2, blueDiffuseLight));
+
+    world = Scene(make_shared<BVHNode>(world));
+
+    Camera cam;
+
+    cam.aspectRatio = 16.0f / 9.0f;
+    cam.imageWidth = 640;
+    cam.samplesPerPixel = 400;
+    cam.maxDepth = 50;
+    
+    cam.verticalFOV = 20;
+    cam.lookfrom = Point3(26, 3, 0);
+    cam.lookat = Point3(0, 2, 0);
+    cam.vup = Vector3(0, 1, 0);
+
+    cam.defocusAngle = 0;
+
+    cam.render(world);
+}
+
 
 int main()
 {
@@ -287,6 +343,7 @@ int main()
     //earthSphere();
     //perlinSpheres();
     //quads();
-    tris();
+    //tris();
+    simpleLight();
 }
 

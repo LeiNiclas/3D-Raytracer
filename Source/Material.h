@@ -19,6 +19,11 @@ class Material
         {
             return false;
         }
+
+        virtual Color emitted(float u, float v, const Point3& p) const
+        {
+            return Color(0);
+        }
 };
 
 
@@ -111,6 +116,23 @@ class DielectricMaterial : public Material
             scattered = Ray(record.p, direction, ray.time());
 
             return true;
+        }
+};
+
+
+class DiffuseLightMaterial : public Material
+{
+    private:
+        shared_ptr<Texture> tex;
+
+
+    public:
+        DiffuseLightMaterial(shared_ptr<Texture> texture) : tex(texture) {}
+        DiffuseLightMaterial(const Color& emit) : tex(make_shared<SolidColorTexture>(emit)) {}
+
+        Color emitted(float u, float v, const Point3& p) const override
+        {
+            return tex->value(u, v, p);
         }
 };
 
