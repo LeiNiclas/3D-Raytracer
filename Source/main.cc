@@ -357,9 +357,15 @@ void cornellBox()
     // Emissive light
     world.add(make_shared<Quad>(Point3(34.3f, 55.4f, 34.3f), Vector3(-13.0f, 0, 0), Vector3(0, 0, -10.5f), lightMaterial));
     // Small box
-    world.add(Box(Point3(13.0f, 0, 6.5f), Point3(29.5f, 16.5f, 23.0f), whiteMaterial));
+    shared_ptr<Hittable> smallBox = Box(Point3(0), Point3(16.5f, 33.0f, 16.5f), whiteMaterial);
+    smallBox = make_shared<RotateY>(smallBox, 15);
+    smallBox = make_shared<Translate>(smallBox, Vector3(26.5f, 0, 29.5f));
+    world.add(smallBox);
     // Bigger box
-    world.add(Box(Point3(26.5f, 0, 29.5f), Point3(43.0f, 33.0f, 46.0f), whiteMaterial));
+    shared_ptr<Hittable> bigBox = Box(Point3(0), Point3(16.5f), whiteMaterial);
+    bigBox = make_shared<RotateY>(bigBox, -20);
+    bigBox = make_shared<Translate>(bigBox, Vector3(13.0f, 0, 6.5f));
+    world.add(bigBox);
 
     world = Scene(make_shared<BVHNode>(world));
 
@@ -367,7 +373,7 @@ void cornellBox()
 
     cam.aspectRatio = 1;
     cam.imageWidth = 400;
-    cam.samplesPerPixel = 1000;
+    cam.samplesPerPixel = 200;
     cam.maxDepth = 100;
     
     cam.verticalFOV = 40;

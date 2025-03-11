@@ -93,6 +93,18 @@ class AAlignedBBox
         }
 };
 
+
+AAlignedBBox operator+(const AAlignedBBox& bbox, const Vector3& offset)
+{
+    return AAlignedBBox(bbox.x + offset.x(), bbox.y + offset.y(), bbox.z + offset.z());
+}
+
+AAlignedBBox operator+(const Vector3& offset, const AAlignedBBox& bbox)
+{
+    return bbox + offset;
+}
+
+
 const AAlignedBBox AAlignedBBox::empty = AAlignedBBox(Interval::empty, Interval::empty, Interval::empty);
 const AAlignedBBox AAlignedBBox::universe = AAlignedBBox(Interval::universe, Interval::universe, Interval::universe);
 

@@ -46,6 +46,17 @@ class Interval
 };
 
 
+Interval operator+(const Interval& interval, float displacement)
+{
+    return Interval(interval.min + displacement, interval.max + displacement);
+}
+
+Interval operator+(float displacement, const Interval& interval)
+{
+    return interval + displacement;
+}
+
+
 const Interval Interval::empty = Interval(infinity, -infinity);
 const Interval Interval::universe = Interval(-infinity, infinity);
 
