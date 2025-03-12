@@ -136,4 +136,24 @@ class DiffuseLightMaterial : public Material
         }
 };
 
+
+class Isotropic : public Material
+{
+    private:
+        shared_ptr<Texture> tex;
+    
+    
+    public:
+        Isotropic(const Color& albedo) : tex(make_shared<SolidColorTexture>(albedo)) {}
+        Isotropic(shared_ptr<Texture> texture) : tex(texture) {}
+
+        bool scatter(const Ray& ray, const HitRecord& record, Color& attenuation, Ray& scattered) const override
+        {
+            scattered = Ray(record.p, randomUnitVector(), ray.time());
+            attenuation = tex->value(record.u, record.v, record.p);
+
+            return true;
+        }
+};
+
 #endif

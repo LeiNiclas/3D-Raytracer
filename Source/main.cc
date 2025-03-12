@@ -2,6 +2,7 @@
 
 #include "BVH.h"
 #include "Camera.h"
+#include "ConstantMedium.h"
 #include "Hittable.h"
 #include "HittableList.h"
 #include "Material.h"
@@ -356,12 +357,12 @@ void cornellBox()
     world.add(make_shared<Quad>(Point3(0, 0, 55.5f), Vector3(55.5f, 0, 0), Vector3(0, 55.5f, 0), whiteMaterial));
     // Emissive light
     world.add(make_shared<Quad>(Point3(34.3f, 55.4f, 34.3f), Vector3(-13.0f, 0, 0), Vector3(0, 0, -10.5f), lightMaterial));
-    // Small box
+    // Small Box
     shared_ptr<Hittable> smallBox = Box(Point3(0), Point3(16.5f, 33.0f, 16.5f), whiteMaterial);
     smallBox = make_shared<RotateY>(smallBox, 15);
     smallBox = make_shared<Translate>(smallBox, Vector3(26.5f, 0, 29.5f));
     world.add(smallBox);
-    // Bigger box
+    // Bigger Box
     shared_ptr<Hittable> bigBox = Box(Point3(0), Point3(16.5f), whiteMaterial);
     bigBox = make_shared<RotateY>(bigBox, -20);
     bigBox = make_shared<Translate>(bigBox, Vector3(13.0f, 0, 6.5f));
@@ -389,6 +390,52 @@ void cornellBox()
 }
 
 
+void cornellBoxSmoke()
+{
+    Scene world;
+    
+    auto red   = make_shared<LambertianMaterial>(Color(.65, .05, .05));
+    auto white = make_shared<LambertianMaterial>(Color(.73, .73, .73));
+    auto green = make_shared<LambertianMaterial>(Color(.12, .45, .15));
+    auto light = make_shared<DiffuseLightMaterial>(Color(7, 7, 7));
+    
+    world.add(make_shared<Quad>(Point3(555,0,0), Vector3(0,555,0), Vector3(0,0,555), green));
+    world.add(make_shared<Quad>(Point3(0,0,0), Vector3(0,555,0), Vector3(0,0,555), red));
+    world.add(make_shared<Quad>(Point3(113,554,127), Vector3(330,0,0), Vector3(0,0,305), light));
+    world.add(make_shared<Quad>(Point3(0,555,0), Vector3(555,0,0), Vector3(0,0,555), white));
+    world.add(make_shared<Quad>(Point3(0,0,0), Vector3(555,0,0), Vector3(0,0,555), white));
+    world.add(make_shared<Quad>(Point3(0,0,555), Vector3(555,0,0), Vector3(0,555,0), white));
+    
+    shared_ptr<Hittable> box1 = Box(Point3(0,0,0), Point3(165,330,165), white);
+    box1 = make_shared<RotateY>(box1, 15);
+    box1 = make_shared<Translate>(box1, Vector3(265,0,295));
+    
+    shared_ptr<Hittable> box2 = Box(Point3(0,0,0), Point3(165,165,165), white);
+    box2 = make_shared<RotateY>(box2, -18);
+    box2 = make_shared<Translate>(box2, Vector3(130,0,65));
+    
+    world.add(make_shared<ConstantMedium>(box1, Color(0,0,0), 0.01));
+    world.add(make_shared<ConstantMedium>(box2, Color(1,1,1), 0.01));
+    
+    Camera cam;
+    
+    cam.aspectRatio      = 1.0;
+    cam.imageWidth       = 320;
+    cam.samplesPerPixel = 1000;
+    cam.maxDepth         = 50;
+    cam.backgroundColor        = Color(0,0,0);
+    
+    cam.verticalFOV     = 40;
+    cam.lookfrom = Point3(278, 278, -800);
+    cam.lookat   = Point3(278, 278, 0);
+    cam.vup      = Vector3(0,1,0);
+    
+    cam.defocusAngle = 0;
+    
+    cam.render(world);
+}
+
+
 int main()
 {
     //experimentalScene();
@@ -397,6 +444,7 @@ int main()
     //quads();
     //tris();
     //simpleLight();
-    cornellBox();
+    //cornellBox();
+    cornellBoxSmoke();
 }
 
