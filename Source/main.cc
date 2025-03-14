@@ -436,6 +436,233 @@ void cornellBoxSmoke()
 }
 
 
+void finalRenderBook2()
+{
+    HittableList groundBoxes;
+
+    int boxesPerSide = 40;
+    int boxSize = 2;
+    float offset = (boxesPerSide / 2) * boxSize;
+
+    for (int x = 0; x < boxesPerSide; x++)
+        for(int z = 0; z < boxesPerSide; z++)
+        {
+            float y = randomFloat(1, 4.5f);
+            
+            float x0 = boxSize * x - offset;
+            float z0 = boxSize * z - offset;
+
+            float x1 = x0 + boxSize;
+            float z1 = z0 + boxSize;
+
+            Color grayscaleColor = Color(randomFloat(0.2f, 0.95f));
+
+            auto mat = make_shared<LambertianMaterial>(grayscaleColor);
+
+            groundBoxes.add(Box(Point3(x0, 0, z0), Point3(x1, y, z1), mat));
+        }
+
+    
+    Scene world;
+
+    world.add(make_shared<BVHNode>(groundBoxes));
+
+    // Light
+    auto whiteLight = make_shared<DiffuseLightMaterial>(Color(4, 4, 4));
+    world.add(make_shared<Quad>(Point3(-8, 20, -8), Vector3(16, 0, 0), Vector3(0, 0, 16), whiteLight));
+
+    // Metal sphere
+    auto metalMat = make_shared<MetalMaterial>(Color(1), 0.05f);
+    world.add(make_shared<Sphere>(Point3(-3, 7, 4), 1.25f, metalMat));
+
+    // Orange glass with air bubble inside
+    auto orangeGlassMat = make_shared<DielectricMaterial>(1.5f, Color(0.95f, 0.6f, 0.3f));
+    auto glassBubbleMat = make_shared<DielectricMaterial>(1.0f / 1.5f);
+    world.add(make_shared<Sphere>(Point3(4, 10, -3), 2, orangeGlassMat));
+    world.add(make_shared<Sphere>(Point3(4, 10, -3), 1.85f, glassBubbleMat));
+
+    // Glass cube
+    auto purpleGlassMat = make_shared<DielectricMaterial>(1.5f, Color(0.85f, 0.5f, 0.95f));
+    shared_ptr<Hittable> glassCube = Cube(Point3(0, 5.5f, 3), 1.75f, purpleGlassMat);
+    shared_ptr<Hittable> innerGlassCube = Cube(Point3(0, 5.5f, 3), 1.5f, glassBubbleMat);
+    glassCube = make_shared<RotateY>(glassCube, 5.625f);
+    innerGlassCube = make_shared<RotateY>(innerGlassCube, 5.625f);
+    world.add(make_shared<BVHNode>(glassCube));
+    world.add(make_shared<BVHNode>(innerGlassCube));
+    world.add(glassCube);
+    world.add(innerGlassCube);
+
+    // Noise sphere
+    auto noiseMat = make_shared<NoiseTexture>(10, 4);
+    world.add(make_shared<Sphere>(Point3(3, 11, 7), 2, make_shared<LambertianMaterial>(noiseMat)));
+
+    // Earth sphere
+    auto earthUV = make_shared<ImageTexture>("EarthUV.png");
+    world.add(make_shared<Sphere>(Point3(14, 10, 11), 3, make_shared<LambertianMaterial>(earthUV)));
+
+    // Pyramid
+    auto pyrMat = make_shared<DielectricMaterial>(1.5f, Color(0.3f, 0.9f, 1.0f));
+    
+    float pyrX0 = 1;
+    float pyrY0 = 5.5f;
+    float pyrZ0 = -2;
+
+    float pyrSidelength = 3;
+
+    Point3 pyrCorner1 = Point3(pyrX0, pyrY0, pyrZ0);
+
+    auto pyrBase = make_shared<Quad>
+    (
+        pyrCorner1,
+        Vector3(pyrSidelength, 0, 0),
+        Vector3(0, 0, pyrSidelength),
+        pyrMat
+    );
+
+    auto pyrSide1 = make_shared<Triangle>
+    (
+        pyrCorner1,
+        Vector3(pyrSidelength, 0, 0),
+        Vector3(pyrSidelength / 2.0f),
+        pyrMat
+    );
+
+    auto pyrSide2 = make_shared<Triangle>
+    (
+        pyrCorner1,
+        Vector3(0, 0, pyrSidelength),
+        Vector3(pyrSidelength / 2.0f),
+        pyrMat
+    );
+
+    Point3 pyrCorner2 = pyrCorner1 + Vector3(pyrSidelength, 0, pyrSidelength);
+
+    auto pyrSide3 = make_shared<Triangle>
+    (
+        pyrCorner2,
+        Vector3(-pyrSidelength, 0, 0),
+        Vector3(-pyrSidelength / 2.0f, 0, -pyrSidelength / 2.0f),
+        pyrMat
+    );
+
+    auto pyrSide4 = make_shared<Triangle>
+    (
+        pyrCorner2,
+        Vector3(0, 0, -pyrSidelength),
+        Vector3(-pyrSidelength / 2.0f, 0, -pyrSidelength / 2.0f),
+        pyrMat
+    );
+
+    HittableList pyramid;
+
+    pyramid.add(pyrBase);
+    pyramid.add(pyrSide1);
+    pyramid.add(pyrSide2);
+    pyramid.add(pyrSide3);
+    pyramid.add(pyrSide4);
+
+    shared_ptr<Hittable> rotatedPyramid = make_shared<HittableList>(pyramid);
+    rotatedPyramid = make_shared<RotateY>(rotatedPyramid, 22.5f);
+    
+    world.add(make_shared<BVHNode>(rotatedPyramid));
+
+    // Fog
+    auto fogBounds = make_shared<Sphere>(Point3(0), 500, make_shared<DielectricMaterial>(1.5f));
+    world.add(make_shared<ConstantMedium>(fogBounds, Color(1), 0.0005f));
+
+    
+    // Camera settings
+    Camera cam;
+
+    cam.aspectRatio = 1;
+    cam.imageWidth = 640;
+    cam.samplesPerPixel = 500;
+    cam.maxDepth = 40;
+
+    cam.verticalFOV = 28;
+    cam.lookfrom = Point3(-20, 6, -18);
+    cam.lookat = Point3(0, 6.5f, 0);
+    cam.vup = Vector3(0, 1, 0);
+
+    cam.backgroundColor = Color(0.005f);
+    cam.defocusAngle = 0;
+
+    cam.multithreadedRender(world);
+}
+
+
+void primitiveShowcase()
+{
+    Scene world;
+
+    auto redMat = make_shared<LambertianMaterial>(Color(0.85f, 0.2f, 0.2f));
+    auto whiteMat = make_shared<LambertianMaterial>(Color(0.975f));
+    auto lightMat = make_shared<DiffuseLightMaterial>(Color(4));
+    // auto redMat = make_shared<DielectricMaterial>(1.5f, Color(0.2f, 0.975f, 0.6f));
+
+    
+    // Ground
+    world.add(make_shared<Quad>(Point3(-10, 0, -8), Vector3(20, 0, 0), Vector3(0, 0, 18), whiteMat));
+    
+    // Light
+    world.add(make_shared<Sphere>(Point3(-0, 30, -0), 5, lightMat));
+
+    // Triangle
+    world.add(make_shared<Triangle>(Point3(-8, 1, -4), Vector3(2, 0, 0), Vector3(0, 0, 2), redMat));
+
+    // Quad
+    world.add(make_shared<Quad>(Point3(-3.5f, 1, -4), Vector3(2, 0, 0), Vector3(0, 0, 2), redMat));
+
+    // Hexagon
+    shared_ptr<Hittable> hex = Hexagon(Point3(2.5f, 1, -3), 1, redMat);
+    hex = make_shared<BVHNode>(hex);
+    world.add(hex);
+    
+    // disk (100-gon)
+    shared_ptr<Hittable> disk = NGon(32, Point3(7, 1, -3), 1, redMat);
+    disk = make_shared<BVHNode>(disk);
+    world.add(disk);
+
+    // Sphere
+    world.add(make_shared<Sphere>(Point3(-7, 1.5f, 3), 1, redMat));
+
+    // Cube
+    shared_ptr<Hittable> cube = Cube(Point3(-2.5f, 1.5f, 3), 2, redMat);
+    cube = make_shared<BVHNode>(cube);
+    world.add(cube);
+
+    // Pyramid
+    shared_ptr<Hittable> pyramid = Pyramid(Point3(2.5f, 0.5f, 3), 2, 1.5, redMat);
+    pyramid = make_shared<BVHNode>(pyramid);
+    world.add(pyramid);
+
+    // Cylinder
+    shared_ptr<Hittable> cylinder = NPrism(32, Point3(7, 0.5f, 3), 1, 2, redMat);
+    cylinder = make_shared<BVHNode>(cylinder);
+    world.add(cylinder);
+
+    world = Scene(make_shared<BVHNode>(world));
+
+
+    Camera cam;
+
+    cam.aspectRatio = 1;
+    cam.imageWidth = 640;
+    cam.samplesPerPixel = 1000;
+    cam.maxDepth = 40;
+
+    cam.verticalFOV = 40;
+    cam.lookfrom = Point3(-10, 20, -20);
+    cam.lookat = Point3(0, 1, 0);
+    cam.vup = Vector3(0, 1, 0);
+
+    cam.defocusAngle = 0;
+    cam.backgroundColor = Color(0.4f, 0.6f, 0.9f);
+
+    cam.render(world);
+}
+
+
 int main()
 {
     //experimentalScene();
@@ -445,6 +672,8 @@ int main()
     //tris();
     //simpleLight();
     //cornellBox();
-    cornellBoxSmoke();
+    //cornellBoxSmoke();
+    finalRenderBook2();
+    //primitiveShowcase();
 }
 

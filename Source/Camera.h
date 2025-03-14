@@ -4,8 +4,11 @@
 #include "Hittable.h"
 #include "Material.h"
 
+#include <atomic>
 #include <chrono>
 #include <iomanip>
+#include <mutex>
+#include <thread>
 
 
 class Camera
@@ -162,6 +165,95 @@ class Camera
             std::clog << "\rDone. Render time: "
             << std::setw(2) << std::setfill('0') << renderTotalMinutes << ":"
             << std::setw(2) << std::setfill('0') << renderTotalSeconds << ".                   ";
+        }
+
+        void multithreadedRender(const Hittable& world)
+        {
+            init();
+
+            auto renderStartTime = std::chrono::high_resolution_clock::now();
+            std::cout << "P3\n" << imageWidth << " " << imageHeight << "\n255\n";
+
+            // Pixel buffer
+            std::vector<Color> pixelBuffer = std::vector<Color>(imageWidth * imageHeight);
+
+            // Multithreading computation
+            std::atomic<int> completedRows = 0; 
+            const int NUMTHREADS = 2 * std::thread::hardware_concurrency();
+            std::vector<std::thread> threads;
+            std::mutex logMutex;
+
+
+            auto renderChunk = [&](int startY, int endY)
+            {
+                for (int y = startY; y < endY; y++)
+                {
+                    // Logging
+                    {
+                        completedRows++;  // Atomically increment completed row count
+
+                        std::lock_guard<std::mutex> lock(logMutex);
+                        auto currentTime = std::chrono::high_resolution_clock::now();
+                        std::chrono::duration<float> elapsedTime = currentTime - renderStartTime;
+                        int minutes = static_cast<int>(elapsedTime.count()) / 60;
+                        int seconds = static_cast<int>(elapsedTime.count()) % 60;
+
+                        float progress = (static_cast<float>(completedRows) / imageHeight) * 100.0f;
+
+                        std::clog << "\rProcessing... " 
+                                  << std::fixed << std::setprecision(2) << progress << "% "
+                                  << "(" << completedRows << " / " << imageHeight << " rows) "
+                                  << std::setw(2) << std::setfill('0') << minutes << ":"
+                                  << std::setw(2) << std::setfill('0') << seconds << " elapsed. ("
+                                  << threads.size() << " threads running)       "
+                                  << std::flush;
+                    }
+                    
+                    for (int x = 0; x < imageWidth; x++)
+                    {
+                        Color pixelColor = Color(0);
+
+                        for (int i = 0; i < samplesPerPixel; i++)
+                        {
+                            Ray ray = getRay(x, y);
+                            pixelColor += rayColor(ray, maxDepth, world);
+                        }
+
+                        pixelBuffer[y * imageWidth + x] = pixelSampleScale * pixelColor;
+                    }
+                }
+            };
+
+            // Create threads
+            int rowsPerThread = imageHeight / NUMTHREADS;
+
+            for (int i = 0; i < NUMTHREADS; i++)
+            {
+                int startY = i * rowsPerThread;
+                int endY = (i == NUMTHREADS - 1) ? imageHeight : startY + rowsPerThread;
+
+                threads.emplace_back(renderChunk, startY, endY);
+            }
+
+            // Wait for threads
+            for (auto& thread : threads) thread.join();
+
+            // Write buffer in correct order
+            for (int y = 0; y < imageHeight; y++)
+                for (int x = 0; x < imageWidth; x++)
+                    writeColor(std::cout, pixelBuffer[y * imageWidth + x]);
+            
+            
+            // Log render time
+            auto renderEndTime = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<float> renderTotalTime = renderEndTime - renderStartTime;
+
+            int renderTotalMinutes = static_cast<int>(renderTotalTime.count()) / 60;
+            int renderTotalSeconds = static_cast<int>(renderTotalTime.count()) % 60;
+
+            std::clog << "\rDone. Render time: "
+                      << std::setw(2) << std::setfill('0') << renderTotalMinutes << ":"
+                      << std::setw(2) << std::setfill('0') << renderTotalSeconds << ".                   ";
         }
 };
 

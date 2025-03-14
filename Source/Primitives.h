@@ -226,10 +226,11 @@ class Sphere : public Hittable
 };
 
 
-
-inline shared_ptr<HittableList> Box(const Point3& center, float sideLength, shared_ptr<Material> mat)
+// COMPOSITES
+// Cube
+inline shared_ptr<HittableList> Cube(const Point3& center, float sideLength, shared_ptr<Material> mat)
 {
-    auto sides = make_shared<HittableList>();
+    auto faces = make_shared<HittableList>();
 
     float halfSideLength = 0.5f * sideLength;
             
@@ -243,44 +244,126 @@ inline shared_ptr<HittableList> Box(const Point3& center, float sideLength, shar
     Vector3 depthVector = Vector3(0, 0, sideLength);
 
     // Front-Bottom-Left - Front-Upper-Right
-    sides->add(make_shared<Quad>(boxCorner1, widthVector, heightVector, mat));
+    faces->add(make_shared<Quad>(boxCorner1, widthVector, heightVector, mat));
     // Front-Bottom-Left - Back-Upper-Left
-    sides->add(make_shared<Quad>(boxCorner1, heightVector, depthVector, mat));
+    faces->add(make_shared<Quad>(boxCorner1, heightVector, depthVector, mat));
     // Front-Bottom-Left - Back-Bottom-Right
-    sides->add(make_shared<Quad>(boxCorner1, widthVector, depthVector, mat));
+    faces->add(make_shared<Quad>(boxCorner1, widthVector, depthVector, mat));
     // Back-Upper-Right - Front-Upper-Left
-    sides->add(make_shared<Quad>(boxCorner2, -widthVector, -depthVector, mat));
+    faces->add(make_shared<Quad>(boxCorner2, -widthVector, -depthVector, mat));
     // Back-Upper-Right - Back-Bottom-Left
-    sides->add(make_shared<Quad>(boxCorner2, -widthVector, -heightVector, mat));
+    faces->add(make_shared<Quad>(boxCorner2, -widthVector, -heightVector, mat));
     // Back-Upper-Right - Front-Bottom-Right
-    sides->add(make_shared<Quad>(boxCorner2, -heightVector, -depthVector, mat));
+    faces->add(make_shared<Quad>(boxCorner2, -heightVector, -depthVector, mat));
 
-    return sides;
+    return faces;
 }
         
 // Box
 inline shared_ptr<HittableList> Box(const Point3& boxCorner1, const Point3& boxCorner2, shared_ptr<Material> mat)
 {
-    auto sides = make_shared<HittableList>();
+    auto faces = make_shared<HittableList>();
 
     Vector3 widthVector = Vector3(boxCorner2.x() - boxCorner1.x(), 0, 0);
     Vector3 heightVector = Vector3(0, boxCorner2.y() - boxCorner1.y(), 0);
     Vector3 depthVector = Vector3(0, 0, boxCorner2.z() - boxCorner1.z());
 
     // Front-Bottom-Left - Front-Upper-Right
-    sides->add(make_shared<Quad>(boxCorner1, widthVector, heightVector, mat));
+    faces->add(make_shared<Quad>(boxCorner1, widthVector, heightVector, mat));
     // Front-Bottom-Left - Back-Upper-Left
-    sides->add(make_shared<Quad>(boxCorner1, heightVector, depthVector, mat));
+    faces->add(make_shared<Quad>(boxCorner1, heightVector, depthVector, mat));
     // Front-Bottom-Left - Back-Bottom-Right
-    sides->add(make_shared<Quad>(boxCorner1, widthVector, depthVector, mat));
+    faces->add(make_shared<Quad>(boxCorner1, widthVector, depthVector, mat));
     // Back-Upper-Right - Front-Upper-Left
-    sides->add(make_shared<Quad>(boxCorner2, -widthVector, -depthVector, mat));
+    faces->add(make_shared<Quad>(boxCorner2, -widthVector, -depthVector, mat));
     // Back-Upper-Right - Back-Bottom-Left
-    sides->add(make_shared<Quad>(boxCorner2, -widthVector, -heightVector, mat));
+    faces->add(make_shared<Quad>(boxCorner2, -widthVector, -heightVector, mat));
     // Back-Upper-Right - Front-Bottom-Right
-    sides->add(make_shared<Quad>(boxCorner2, -heightVector, -depthVector, mat));
+    faces->add(make_shared<Quad>(boxCorner2, -heightVector, -depthVector, mat));
 
-    return sides;
+    return faces;
+}
+
+// Pyramid
+inline shared_ptr<HittableList> Pyramid(const Point3& baseCenter, float sidelength, float height, shared_ptr<Material> mat)
+{
+    auto faces = make_shared<HittableList>();
+
+    // Corner vertices
+    Point3 A = baseCenter + Vector3(sidelength / 2.0f, 0, sidelength / 2.0f);
+    Point3 B = baseCenter + Vector3(sidelength / 2.0f, 0, -sidelength / 2.0f);
+    Point3 C = baseCenter + Vector3(-sidelength / 2.0f, 0, -sidelength / 2.0f);
+    Point3 D = baseCenter + Vector3(-sidelength / 2.0f, 0, sidelength / 2.0f);
+    
+    // Top point
+    Point3 E = baseCenter + Vector3(0, height, 0);
+
+    faces->add(make_shared<Triangle>(A, B - A, E - A, mat));
+    faces->add(make_shared<Triangle>(A, D - A, E - A, mat));
+    faces->add(make_shared<Triangle>(C, B - C, E - C, mat));
+    faces->add(make_shared<Triangle>(C, D - C, E - C, mat));
+    faces->add(make_shared<Quad>(A, B - A, D - A, mat));
+
+    return faces;
+}
+
+// N-gon (2D flat on y-Plane)
+inline shared_ptr<HittableList> NGon(int n, const Point3& C, float r, shared_ptr<Material> mat)
+{
+    auto faces = make_shared<HittableList>();
+
+    float deltaTheta = 360.0f / n;
+    Vector3 basisVector = (r, 0, r);
+    Vector3 A = (r, C.y(), 0);
+    Vector3 B;
+    Vector3 tmp;
+
+    for (int i = 1; i < n + 2; i++)
+    {
+        tmp = A;
+        A = basisVector * Vector3(std::cosf(deg2rad(i * deltaTheta)), 0, std::sinf(deg2rad(i * deltaTheta)));
+        B = tmp;
+
+        faces->add(make_shared<Triangle>(C, A, B, mat));
+    }
+
+    return faces;
+}
+
+// Hexagon (2D flat on y-Plane)
+inline shared_ptr<HittableList> Hexagon(const Point3& baseCenter, float r, shared_ptr<Material> mat)
+{
+    return NGon(6, baseCenter, r, mat);
+}
+
+// Disk (2D flat on y-Plane)
+inline shared_ptr<HittableList> Disk(const Point3& baseCenter, float r, shared_ptr<Material> mat)
+{
+    return NGon(100, baseCenter, r, mat);
+}
+
+// N-Prism
+inline shared_ptr<HittableList> NPrism(int n, const Point3& C, float r, float h, shared_ptr<Material> mat)
+{
+    auto faces = make_shared<HittableList>();
+
+    auto bottomFace = NGon(n, C, r, mat);
+    auto topFace = NGon(n, C + Vector3(0, h, 0), r, mat);
+    
+    faces->add(bottomFace);
+    faces->add(topFace);
+
+    float deltaTheta = 360.0f / n;
+
+    for (int i = 0; i < n + 1; i++)
+    {
+        Vector3 A = C + Vector3(std::cosf(deg2rad(i * deltaTheta)), 0, std::sinf(deg2rad(i * deltaTheta)));
+        Vector3 B = C + Vector3(std::cosf(deg2rad((i + 1) * deltaTheta)), 0, std::sinf(deg2rad((i + 1) * deltaTheta)));
+
+        faces->add(make_shared<Quad>(A, B - A, Vector3(0, h, 0), mat));
+    }
+
+    return faces;
 }
 
 

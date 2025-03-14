@@ -93,7 +93,7 @@ class RotateY : public Hittable
                     {
                         float x = i * bbox.x.max + (1 - i) * bbox.x.min;
                         float y = j * bbox.y.max + (1 - j) * bbox.y.min;
-                        float z = k * bbox.z.max + (1 - j) * bbox.z.min;
+                        float z = k * bbox.z.max + (1 - k) * bbox.z.min;
 
                         float rotatedX = cosTheta * x + sinTheta * z;
                         float rotatedZ = -sinTheta * x + cosTheta * z;
